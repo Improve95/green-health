@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Monitor, Camera, RotateCcw, FileText, Calendar, X, Play } from 'lucide-react';
+import { Monitor, Camera, RotateCcw, FileText, Calendar, X, Play, Camera as CameraIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,38 @@ export function StreamingSourceCard({
   onGenerateReport 
 }: StreamingSourceCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fullVideoRef = useRef<HTMLVideoElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  const takeScreenshot = () => {
+    const video = fullVideoRef.current;
+    if (!video) return;
+
+    // Create a canvas to draw the video frame
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+
+    // Draw the current video frame
+    ctx.drawImage(video, 0, 0);
+
+    // Convert canvas to blob and download
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `screenshot-${source.name}-${new Date().getTime()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  };
 
   useEffect(() => {
     if (videoRef.current && source.stream) {
@@ -142,24 +173,37 @@ export function StreamingSourceCard({
             </DialogTitle>
           </DialogHeader>
           
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-            {source.stream ? (
-              <video
-                autoPlay
-                muted
-                playsInline
-                ref={(el) => {
-                  if (el && source.stream) {
-                    el.srcObject = source.stream;
-                  }
-                }}
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <p className="text-muted-foreground">Stream not available</p>
-              </div>
-            )}
+          <div className="space-y-4">
+            <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+              {source.stream ? (
+                <video
+                  autoPlay
+                  muted
+                  playsInline
+                  ref={(el) => {
+                    if (el && source.stream) {
+                      el.srcObject = source.stream;
+                      fullVideoRef.current = el;
+                    }
+                  }}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-muted-foreground">Stream not available</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Screenshot button */}
+            <Button 
+              onClick={takeScreenshot}
+              className="w-full"
+              variant="outline"
+            >
+              <CameraIcon className="w-4 h-4 mr-2" />
+              Take Screenshot
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
