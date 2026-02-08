@@ -153,11 +153,6 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
           </div>
         </div>
 
-        <div className="flex-shrink-0 p-6 pt-4 border-t border-border">
-          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Close
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
