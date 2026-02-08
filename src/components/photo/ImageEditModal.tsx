@@ -151,21 +151,16 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
         </div>
 
         {/* Actions */}
-        <div className="flex-shrink-0 flex items-center justify-between gap-4 pt-4 border-t border-border">
-          <Button variant="outline" onClick={handleReset}>
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Reset
-          </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleApply}>
-              <Check className="w-4 h-4 mr-2" />
-              Apply
-            </Button>
-          </div>
-        </div>
+         <div className="flex-shrink-0 flex items-center justify-between gap-4 pt-4 border-t border-border">
+           <Button variant="outline" onClick={handleReset}>
+             <RotateCcw className="w-4 h-4 mr-2" />
+             Reset
+           </Button>
+           <Button onClick={handleApply}>
+             <Check className="w-4 h-4 mr-2" />
+             Apply
+           </Button>
+         </div>
       </DialogContent>
     </Dialog>
   );
