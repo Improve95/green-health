@@ -5,13 +5,37 @@ import { FileUploadZone } from '@/components/shared/FileUploadZone';
 import { ImagePreviewCard } from './ImagePreviewCard';
 import { ImageEditModal } from './ImageEditModal';
 import { AnalysisPanel } from '@/components/shared/AnalysisPanel';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { submitPhotoAnalysis } from '@/services/api';
 import type { ImageFile, PhotoReport, DiseaseDetection } from '@/types/app';
+import type { PhotoAnalysisRequestImage } from '@/types/api';
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Strip data URL prefix
+      resolve(result.split(',')[1] || result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export function PhotoAnalysis() {
   const { uploadedImages, addImages, removeImage, updateImage, addPhotoReport, setViewMode } = useApp();
   const [editingImage, setEditingImage] = useState<ImageFile | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [reportName, setReportName] = useState('');
+
+  const getDefaultReportName = () => {
+    if (uploadedImages.length === 1) {
+      return `${uploadedImages[0].name} - ${new Date().toLocaleString()}`;
+    }
+    return `Photo Analysis - ${new Date().toLocaleString()}`;
+  };
 
   const handleFilesSelected = useCallback((files: File[]) => {
     const imageFiles: ImageFile[] = files
@@ -36,60 +60,67 @@ export function PhotoAnalysis() {
 
     setIsAnalyzing(true);
 
-    // Simulate analysis with mock data
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Build request body with image data and settings
+      const images: PhotoAnalysisRequestImage[] = await Promise.all(
+        uploadedImages.map(async (img) => ({
+          data: await fileToBase64(img.file),
+          fileName: img.name,
+          mimeType: img.type,
+          settings: {
+            brightness: img.brightness,
+            contrast: img.contrast,
+            saturation: img.saturation,
+          },
+        }))
+      );
 
-    // Create mock reports for each image
-    const mockDiseases = [
-      'Leaf Blight',
-      'Powdery Mildew',
-      'Root Rot',
-      'Bacterial Spot',
-      'Mosaic Virus'
-    ];
+      const name = reportName.trim() || getDefaultReportName();
 
-    const mockPlants = ['Tomato', 'Corn', 'Wheat', 'Rice', 'Soybean'];
-    const mockParts = ['Leaf', 'Stem', 'Root', 'Fruit', 'Flower'];
+      const response = await submitPhotoAnalysis({
+        reportName: name,
+        images,
+      });
 
-    uploadedImages.forEach(image => {
-      const detections: DiseaseDetection[] = [{
-        id: crypto.randomUUID(),
-        disease: mockDiseases[Math.floor(Math.random() * mockDiseases.length)],
-        confidence: Math.floor(Math.random() * 30) + 70,
-        boundingBox: {
-          x: Math.random() * 0.3,
-          y: Math.random() * 0.3,
-          width: 0.3 + Math.random() * 0.3,
-          height: 0.3 + Math.random() * 0.3,
-        },
-        symptoms: [
-          'Yellow spots on leaves',
-          'Wilting edges',
-          'Brown discoloration'
-        ],
-        recommendations: [
-          'Apply fungicide treatment',
-          'Improve drainage',
-          'Remove affected leaves'
-        ]
-      }];
+      // Map API response to local PhotoReport model
+      uploadedImages.forEach((image, index) => {
+        const imageResult = response.results[index];
+        const detections: DiseaseDetection[] = imageResult
+          ? imageResult.diseases.map(d => ({
+              id: crypto.randomUUID(),
+              disease: d.disease,
+              confidence: d.probability,
+              boundingBox: undefined,
+              symptoms: d.symptoms,
+              recommendations: [
+                'Apply appropriate treatment',
+                'Monitor plant health',
+                'Consult agronomist if symptoms persist',
+              ],
+            }))
+          : [];
 
-      const report: PhotoReport = {
-        id: crypto.randomUUID(),
-        createdAt: new Date(),
-        imageUrl: image.preview,
-        imageName: image.name,
-        plantSpecies: mockPlants[Math.floor(Math.random() * mockPlants.length)],
-        affectedPart: mockParts[Math.floor(Math.random() * mockParts.length)],
-        detections,
-        status: 'completed'
-      };
+        const report: PhotoReport = {
+          id: response.reportId + (uploadedImages.length > 1 ? `-${index}` : ''),
+          createdAt: new Date(),
+          imageUrl: image.preview,
+          imageName: image.name,
+          plantSpecies: imageResult?.diseases[0]?.plantPart || 'Unknown',
+          affectedPart: imageResult?.diseases[0]?.plantPart || 'Unknown',
+          detections,
+          status: response.status,
+        };
 
-      addPhotoReport(report);
-    });
+        addPhotoReport(report);
+      });
 
-    setIsAnalyzing(false);
-    setViewMode('report');
+      setReportName('');
+      setViewMode('report');
+    } catch (err) {
+      console.error('Photo analysis failed:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const hasImages = uploadedImages.length > 0;
@@ -139,6 +170,22 @@ export function PhotoAnalysis() {
 
         {/* Right panel */}
         <div className="lg:sticky lg:top-4 space-y-4">
+          {/* Report name input */}
+          {hasImages && (
+            <div className="bg-card rounded-xl border border-border p-4 space-y-2">
+              <Label htmlFor="report-name" className="text-sm font-medium text-foreground">
+                Report Name
+              </Label>
+              <Input
+                id="report-name"
+                placeholder={getDefaultReportName()}
+                value={reportName}
+                onChange={(e) => setReportName(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+          )}
+
           <AnalysisPanel
             itemCount={uploadedImages.length}
             itemLabel="image"

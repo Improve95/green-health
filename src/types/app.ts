@@ -70,6 +70,7 @@ export interface VideoReport {
 export interface AnalyzedFrame {
   id: string;
   timestamp: number;
+  frameNumber?: number;
   frameUrl: string;
   plantSpecies: string;
   affectedPart: string;

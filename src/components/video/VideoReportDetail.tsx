@@ -131,7 +131,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                   >
                     <div className="aspect-video bg-muted relative">
                       <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-                        Frame {index + 1}
+                        Frame {frame.frameNumber ?? index + 1}
                       </div>
                       <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-foreground/80 text-background text-[10px]">
                         {formatTime(frame.timestamp)}
