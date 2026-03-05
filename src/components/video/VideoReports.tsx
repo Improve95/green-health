@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FileVideo, Filter } from 'lucide-react';
+import { FileVideo } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ReportFilterPanel } from '@/components/shared/ReportFilterPanel';
 import { VideoReportCard } from './VideoReportCard';
 import { VideoReportDetail } from './VideoReportDetail';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
 import type { VideoReport } from '@/types/app';
@@ -16,9 +16,7 @@ export function VideoReports() {
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('all');
   const [serverReports, setServerReports] = useState<VideoReport[]>([]);
 
-  // Poll server for reports
   useEffect(() => {
-
     const poll = async () => {
       try {
         const status = statusFilter === 'all' ? undefined : statusFilter;
@@ -53,59 +51,35 @@ export function VideoReports() {
     ? allReports
     : allReports.filter(r => r.status === statusFilter);
 
-  if (filteredReports.length === 0 && statusFilter === 'all') {
-    return (
-      <EmptyState
-        icon={FileVideo}
-        title="No Video Reports Yet"
-        description="Upload and analyze plant videos to see disease detection reports here."
-      />
-    );
-  }
-
   return (
     <div className="animate-fade-in space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading font-semibold text-lg text-foreground">
-          Video Reports
-        </h2>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as ReportStatus | 'all')}
-            >
-              <SelectTrigger className="w-[140px] h-8 text-sm">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="analyzing">Analyzing</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="error">Error</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </div>
+      <h2 className="font-heading font-semibold text-lg text-foreground">
+        Video Reports
+      </h2>
 
-      <div className="grid gap-4">
-        {filteredReports.map(report => (
-          <VideoReportCard
-            key={report.id}
-            report={report}
-            onClick={() => setSelectedReport(report)}
-          />
-        ))}
-      </div>
+      <ReportFilterPanel
+        activeFilter={statusFilter}
+        onApply={setStatusFilter}
+        totalCount={filteredReports.length}
+      />
 
-      {filteredReports.length === 0 && statusFilter !== 'all' && (
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          No reports with status "{statusFilter}"
+      {filteredReports.length === 0 ? (
+        <EmptyState
+          icon={FileVideo}
+          title={statusFilter === 'all' ? 'No Video Reports Yet' : `No "${statusFilter}" reports`}
+          description={statusFilter === 'all'
+            ? 'Upload and analyze plant videos to see disease detection reports here.'
+            : 'Try changing the filter to see other reports.'}
+        />
+      ) : (
+        <div className="grid gap-4">
+          {filteredReports.map(report => (
+            <VideoReportCard
+              key={report.id}
+              report={report}
+              onClick={() => setSelectedReport(report)}
+            />
+          ))}
         </div>
       )}
 
