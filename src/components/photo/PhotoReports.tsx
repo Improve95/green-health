@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { FileImage, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileImage } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ReportFilterPanel } from '@/components/shared/ReportFilterPanel';
 import { PhotoReportCard } from './PhotoReportCard';
 import { PhotoReportDetail } from './PhotoReportDetail';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
 import type { PhotoReport } from '@/types/app';
@@ -16,7 +16,6 @@ export function PhotoReports() {
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('all');
   const [serverReports, setServerReports] = useState<PhotoReport[]>([]);
 
-  // Poll server for reports
   useEffect(() => {
     const poll = async () => {
       try {
@@ -44,70 +43,44 @@ export function PhotoReports() {
     return () => clearInterval(interval);
   }, [statusFilter]);
 
-  // Combine local and server reports, deduplicate by id
   const allReports = [...serverReports, ...photoReports].reduce<PhotoReport[]>((acc, r) => {
     if (!acc.find(e => e.id === r.id)) acc.push(r);
     return acc;
   }, []);
 
-  // Apply local status filter
   const filteredReports = statusFilter === 'all'
     ? allReports
     : allReports.filter(r => r.status === statusFilter);
 
-  if (filteredReports.length === 0 && statusFilter === 'all') {
-    return (
-      <EmptyState
-        icon={FileImage}
-        title="No Photo Reports Yet"
-        description="Upload and analyze plant images to see disease detection reports here."
-      />
-    );
-  }
-
   return (
     <div className="animate-fade-in space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading font-semibold text-lg text-foreground">
-          Photo Reports
-        </h2>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as ReportStatus | 'all')}
-            >
-              <SelectTrigger className="w-[140px] h-8 text-sm">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="analyzing">Analyzing</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="error">Error</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </div>
+      <h2 className="font-heading font-semibold text-lg text-foreground">
+        Photo Reports
+      </h2>
 
-      <div className="grid gap-4">
-        {filteredReports.map(report => (
-          <PhotoReportCard
-            key={report.id}
-            report={report}
-            onClick={() => setSelectedReport(report)}
-          />
-        ))}
-      </div>
+      <ReportFilterPanel
+        activeFilter={statusFilter}
+        onApply={setStatusFilter}
+        totalCount={filteredReports.length}
+      />
 
-      {filteredReports.length === 0 && statusFilter !== 'all' && (
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          No reports with status "{statusFilter}"
+      {filteredReports.length === 0 ? (
+        <EmptyState
+          icon={FileImage}
+          title={statusFilter === 'all' ? 'No Photo Reports Yet' : `No "${statusFilter}" reports`}
+          description={statusFilter === 'all'
+            ? 'Upload and analyze plant images to see disease detection reports here.'
+            : 'Try changing the filter to see other reports.'}
+        />
+      ) : (
+        <div className="grid gap-4">
+          {filteredReports.map(report => (
+            <PhotoReportCard
+              key={report.id}
+              report={report}
+              onClick={() => setSelectedReport(report)}
+            />
+          ))}
         </div>
       )}
 
