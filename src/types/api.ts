@@ -72,7 +72,7 @@ export interface VideoAnalysisResponse {
 // ── Reports ──
 
 export type ReportStatus = 'analyzing' | 'completed' | 'error';
-export type ReportType = 'photo' | 'video';
+export type ReportType = 'photo' | 'video' | 'streaming';
 
 export interface ReportListItem {
   reportId: string;
