@@ -7,7 +7,6 @@ import { PhotoReportDetail } from './PhotoReportDetail';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
-import { USE_REAL_BACKEND } from '@/config/api';
 import type { PhotoReport } from '@/types/app';
 import type { ReportStatus } from '@/types/api';
 
@@ -19,13 +18,10 @@ export function PhotoReports() {
 
   // Poll server for reports
   useEffect(() => {
-    if (!USE_REAL_BACKEND) return;
-
     const poll = async () => {
       try {
         const status = statusFilter === 'all' ? undefined : statusFilter;
         const res = await fetchReports('photo', status);
-        // Map server reports to local format
         setServerReports(
           res.reports.map(r => ({
             id: r.reportId,
@@ -49,12 +45,10 @@ export function PhotoReports() {
   }, [statusFilter]);
 
   // Combine local and server reports, deduplicate by id
-  const allReports = USE_REAL_BACKEND
-    ? [...serverReports, ...photoReports].reduce<PhotoReport[]>((acc, r) => {
-        if (!acc.find(e => e.id === r.id)) acc.push(r);
-        return acc;
-      }, [])
-    : photoReports;
+  const allReports = [...serverReports, ...photoReports].reduce<PhotoReport[]>((acc, r) => {
+    if (!acc.find(e => e.id === r.id)) acc.push(r);
+    return acc;
+  }, []);
 
   // Apply local status filter
   const filteredReports = statusFilter === 'all'

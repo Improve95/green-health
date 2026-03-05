@@ -6,7 +6,7 @@ import { VideoReportCard } from './VideoReportCard';
 import { VideoReportDetail } from './VideoReportDetail';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchReports } from '@/services/api';
-import { REPORT_POLL_INTERVAL, USE_REAL_BACKEND } from '@/config/api';
+import { REPORT_POLL_INTERVAL } from '@/config/api';
 import type { VideoReport } from '@/types/app';
 import type { ReportStatus } from '@/types/api';
 
@@ -18,7 +18,6 @@ export function VideoReports() {
 
   // Poll server for reports
   useEffect(() => {
-    if (!USE_REAL_BACKEND) return;
 
     const poll = async () => {
       try {
@@ -45,12 +44,10 @@ export function VideoReports() {
     return () => clearInterval(interval);
   }, [statusFilter]);
 
-  const allReports = USE_REAL_BACKEND
-    ? [...serverReports, ...videoReports].reduce<VideoReport[]>((acc, r) => {
-        if (!acc.find(e => e.id === r.id)) acc.push(r);
-        return acc;
-      }, [])
-    : videoReports;
+  const allReports = [...serverReports, ...videoReports].reduce<VideoReport[]>((acc, r) => {
+    if (!acc.find(e => e.id === r.id)) acc.push(r);
+    return acc;
+  }, []);
 
   const filteredReports = statusFilter === 'all'
     ? allReports
