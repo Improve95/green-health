@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { X, Play, Pause, Clock, AlertTriangle, Leaf, Target, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { X, Play, Pause, Clock, AlertTriangle, Leaf, Target, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { VideoReport, AnalyzedFrame } from '@/types/app';
@@ -15,7 +16,32 @@ interface VideoReportDetailProps {
 export function VideoReportDetail({ report, open, onClose }: VideoReportDetailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
   const [selectedFrame, setSelectedFrame] = useState<AnalyzedFrame | null>(null);
+  const FRAME_DURATION = 1 / 30;
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    const handleTimeUpdate = () => {
+      if (!isSeeking) setCurrentTime(videoEl.currentTime);
+    };
+    const handleLoadedMetadata = () => setDuration(videoEl.duration);
+    const handleEnded = () => setIsPlaying(false);
+
+    videoEl.addEventListener('timeupdate', handleTimeUpdate);
+    videoEl.addEventListener('loadedmetadata', handleLoadedMetadata);
+    videoEl.addEventListener('ended', handleEnded);
+
+    return () => {
+      videoEl.removeEventListener('timeupdate', handleTimeUpdate);
+      videoEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      videoEl.removeEventListener('ended', handleEnded);
+    };
+  }, [report, isSeeking]);
 
   if (!report) return null;
 
@@ -29,12 +55,27 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
     setIsPlaying(!isPlaying);
   };
 
+  const seekTo = (time: number) => {
+    if (!videoRef.current || !duration) return;
+    const clamped = Math.max(0, Math.min(duration, time));
+    videoRef.current.currentTime = clamped;
+    setCurrentTime(clamped);
+  };
+
+  const stepFrame = (direction: 1 | -1) => {
+    if (!videoRef.current) return;
+    videoRef.current.pause();
+    setIsPlaying(false);
+    seekTo(videoRef.current.currentTime + direction * FRAME_DURATION);
+  };
+
   const jumpToFrame = (frame: AnalyzedFrame) => {
     setSelectedFrame(frame);
     if (videoRef.current) {
       videoRef.current.currentTime = frame.timestamp;
       videoRef.current.pause();
       setIsPlaying(false);
+      setCurrentTime(frame.timestamp);
     }
   };
 
@@ -110,6 +151,42 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                   }}
                 />
               )}
+            </div>
+
+            {/* Timeline slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+              <Slider
+                value={[duration ? (currentTime / duration) * 100 : 0]}
+                onValueChange={([value]) => {
+                  setIsSeeking(true);
+                  if (videoRef.current && duration) {
+                    const newTime = (value / 100) * duration;
+                    videoRef.current.currentTime = newTime;
+                    setCurrentTime(newTime);
+                  }
+                }}
+                onValueCommit={() => setIsSeeking(false)}
+                max={100}
+                step={0.1}
+              />
+              {/* Frame-by-frame controls */}
+              <div className="flex items-center justify-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => stepFrame(-1)}>
+                  <SkipBack className="w-4 h-4 mr-1" />
+                  Frame
+                </Button>
+                <Button variant="outline" size="sm" onClick={togglePlay}>
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => stepFrame(1)}>
+                  Frame
+                  <SkipForward className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
 
             {/* Frame thumbnails */}
@@ -199,7 +276,6 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
 
                     {selectedFrame.detections.map(detection => (
                       <div key={detection.id} className="space-y-4">
-                        {/* Disease detection */}
                         <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <AlertTriangle className="w-5 h-5 text-destructive" />
@@ -218,7 +294,6 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                           </div>
                         </div>
 
-                        {/* Symptoms */}
                         <div>
                           <h4 className="text-sm font-medium text-foreground mb-2">Symptoms</h4>
                           <ul className="space-y-1">
@@ -231,7 +306,6 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                           </ul>
                         </div>
 
-                        {/* Recommendations */}
                         <div>
                           <h4 className="text-sm font-medium text-foreground mb-2">Recommendations</h4>
                           <ul className="space-y-1">
