@@ -1,0 +1,54 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceArrowThickness 1.5
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+actor User
+participant Browser as "Frontend"
+participant JavaBackend as "Backend"
+participant PythonBackend as "ML Service"
+participant Model as "Plant Disease Model"
+
+== 1. Инициация анализа ==
+
+User -> Browser: Выбирает видео файл
+Browser -> JavaBackend: POST /api/analysis/init\n{ desiredFrameRate: 1.0, ... }
+JavaBackend -> JavaBackend: Генерирует analysisId\nСохраняет параметры сессии
+JavaBackend --> Browser: 201 Created\n{ analysisId, wsUrl }
+
+== 2. Подключение к стримингу ==
+
+Browser -> JavaBackend: WebSocket connect\nws://.../video/{analysisId}
+JavaBackend -> JavaBackend: Создаёт Piped streams\nЗапускает FFmpegFrameGrabber
+
+Browser --> JavaBackend: WebSocket: {type: "start_upload"}
+
+== 3. Потоковая передача видео ==
+
+loop Каждые ~800 мс
+    Browser -> JavaBackend: WebSocket binary message\n(video chunk: webm/mp4)
+    JavaBackend -> JavaBackend: pipe.write(chunk)
+    JavaBackend -> JavaBackend: FFmpegFrameGrabber читает поток
+    alt Достигнут интервал desiredFrameRate
+        JavaBackend -> JavaBackend: Извлекает кадр → JPEG bytes
+        JavaBackend -> PythonBackend: POST /analyze_frame\nX-Analysis-Id: {analysisId}\n(body: jpeg binary)
+        PythonBackend -> Model: Выполняет inference\n(SAM + классификатор болезней)
+        Model --> PythonBackend: {disease, confidence, part, ...}
+        PythonBackend --> JavaBackend: JSON-ответ
+        JavaBackend -> JavaBackend: Сохраняет результат в сессию
+        JavaBackend --> Browser: WebSocket text\n{type: "frame_result", frameNumber, result}
+    end
+end
+
+== 4. Завершение загрузки ==
+
+Browser -> JavaBackend: WebSocket: {type: "upload_complete"}
+JavaBackend -> JavaBackend: Закрывает input pipe
+JavaBackend -> JavaBackend: Дожидается обработки буфера
+JavaBackend --> Browser: WebSocket: {type: "analysis_complete", summary}
+
+Browser -> User: Отображает полный отчёт\n(список кадров + результаты)
+
+@enduml

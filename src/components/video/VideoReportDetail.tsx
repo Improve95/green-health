@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Play, Pause, Clock, AlertTriangle, Leaf, Target, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
+  const isSeekingRef = useRef(false);
   const [selectedFrame, setSelectedFrame] = useState<AnalyzedFrame | null>(null);
   const FRAME_DURATION = 1 / 30;
 
@@ -27,7 +27,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
     if (!videoEl) return;
 
     const handleTimeUpdate = () => {
-      if (!isSeeking) setCurrentTime(videoEl.currentTime);
+      if (!isSeekingRef.current) setCurrentTime(videoEl.currentTime);
     };
     const handleLoadedMetadata = () => setDuration(videoEl.duration);
     const handleEnded = () => setIsPlaying(false);
@@ -36,12 +36,17 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
     videoEl.addEventListener('loadedmetadata', handleLoadedMetadata);
     videoEl.addEventListener('ended', handleEnded);
 
+    // Race condition fix: if metadata already loaded before listener was attached
+    if (videoEl.readyState >= 1) {
+      setDuration(videoEl.duration);
+    }
+
     return () => {
       videoEl.removeEventListener('timeupdate', handleTimeUpdate);
       videoEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
       videoEl.removeEventListener('ended', handleEnded);
     };
-  }, [report, isSeeking]);
+  }, [report]);
 
   if (!report) return null;
 
@@ -121,6 +126,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                 ref={videoRef}
                 src={report.videoUrl}
                 className="w-full aspect-video object-contain"
+                onLoadedMetadata={(e) => setDuration((e.target as HTMLVideoElement).duration)}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
               />
@@ -162,14 +168,14 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
               <Slider
                 value={[duration ? (currentTime / duration) * 100 : 0]}
                 onValueChange={([value]) => {
-                  setIsSeeking(true);
+                  isSeekingRef.current = true;
                   if (videoRef.current && duration) {
                     const newTime = (value / 100) * duration;
                     videoRef.current.currentTime = newTime;
                     setCurrentTime(newTime);
                   }
                 }}
-                onValueCommit={() => setIsSeeking(false)}
+                onValueCommit={() => { isSeekingRef.current = false; }}
                 max={100}
                 step={0.1}
               />
