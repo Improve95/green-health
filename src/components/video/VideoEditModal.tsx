@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, Scissors, Sun, Contrast } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Play, Pause, RotateCcw, Scissors, Sun, Contrast, SkipBack, SkipForward } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -18,10 +18,12 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(100);
+  const FRAME_DURATION = 1 / 30;
 
   useEffect(() => {
     if (video) {
@@ -36,7 +38,9 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
     const videoEl = videoRef.current;
     if (!videoEl) return;
 
-    const handleTimeUpdate = () => setCurrentTime(videoEl.currentTime);
+    const handleTimeUpdate = () => {
+      if (!isSeeking) setCurrentTime(videoEl.currentTime);
+    };
     const handleLoadedMetadata = () => setDuration(videoEl.duration);
     const handleEnded = () => setIsPlaying(false);
 
@@ -49,7 +53,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
       videoEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
       videoEl.removeEventListener('ended', handleEnded);
     };
-  }, [video]);
+  }, [video, isSeeking]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -60,6 +64,20 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
     }
     setIsPlaying(!isPlaying);
   };
+
+  const seekTo = useCallback((time: number) => {
+    if (!videoRef.current || !duration) return;
+    const clamped = Math.max(0, Math.min(duration, time));
+    videoRef.current.currentTime = clamped;
+    setCurrentTime(clamped);
+  }, [duration]);
+
+  const stepFrame = useCallback((direction: 1 | -1) => {
+    if (!videoRef.current) return;
+    videoRef.current.pause();
+    setIsPlaying(false);
+    seekTo(videoRef.current.currentTime + direction * FRAME_DURATION);
+  }, [seekTo]);
 
   const handleReset = () => {
     setBrightness(100);
@@ -130,13 +148,31 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
               <Slider
                 value={[duration ? (currentTime / duration) * 100 : 0]}
                 onValueChange={([value]) => {
+                  setIsSeeking(true);
                   if (videoRef.current && duration) {
-                    videoRef.current.currentTime = (value / 100) * duration;
+                    const newTime = (value / 100) * duration;
+                    videoRef.current.currentTime = newTime;
+                    setCurrentTime(newTime);
                   }
                 }}
+                onValueCommit={() => setIsSeeking(false)}
                 max={100}
                 step={0.1}
               />
+              {/* Frame-by-frame controls */}
+              <div className="flex items-center justify-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => stepFrame(-1)}>
+                  <SkipBack className="w-4 h-4 mr-1" />
+                  Frame
+                </Button>
+                <Button variant="outline" size="sm" onClick={togglePlay}>
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => stepFrame(1)}>
+                  Frame
+                  <SkipForward className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
           </div>
 
