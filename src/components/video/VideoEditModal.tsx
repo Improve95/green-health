@@ -45,6 +45,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
   // Frame editor
   const [activeTab, setActiveTab] = useState('video');
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
+  const [capturedFrameSize, setCapturedFrameSize] = useState<{ w: number; h: number } | null>(null);
   const [frameZoom, setFrameZoom] = useState(100);
   const [frameBrightness, setFrameBrightness] = useState(100);
   const [frameContrast, setFrameContrast] = useState(100);
@@ -60,6 +61,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
       setSelectionMode(false);
       setSelection(null);
       setCapturedFrame(null);
+      setCapturedFrameSize(null);
       setActiveTab('video');
       setVideoNaturalSize(null);
     }
@@ -186,6 +188,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
     );
 
     setCapturedFrame(canvas.toDataURL('image/png'));
+    setCapturedFrameSize({ w: canvas.width, h: canvas.height });
     setFrameZoom(100);
     setFrameBrightness(100);
     setFrameContrast(100);
@@ -256,7 +259,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                       ? `${videoNaturalSize.w} / ${videoNaturalSize.h}`
                       : '16 / 9',
                     width: videoNaturalSize
-                      ? `min(100%, calc(80vh * ${videoNaturalSize.w} / ${videoNaturalSize.h}))`
+                      ? `min(100%, calc((96vh - 370px) * ${videoNaturalSize.w} / ${videoNaturalSize.h}))`
                       : '100%',
                   }}
                 >
@@ -270,18 +273,25 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                       setDuration(vid.duration);
                       setVideoNaturalSize({ w: vid.videoWidth, h: vid.videoHeight });
                     }}
+                    onTimeUpdate={(e) => {
+                      if (!isSeekingRef.current)
+                        setCurrentTime((e.target as HTMLVideoElement).currentTime);
+                    }}
                   />
 
                   {/* Play overlay (hidden in selection mode) */}
                   {!selectionMode && (
                     <button
                       onClick={togglePlay}
-                      className="absolute inset-0 flex items-center justify-center bg-foreground/10 hover:bg-foreground/20 transition-colors"
+                      className="absolute inset-0 hover:bg-black/10 transition-colors duration-200"
                     >
-                      <div className="w-16 h-16 rounded-full bg-card/90 flex items-center justify-center">
+                      <div
+                        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full pointer-events-none transition-opacity duration-200"
+                        style={{ opacity: isPlaying ? 0 : 0.35, background: 'rgb(0 0 0 / 0.3)' }}
+                      >
                         {isPlaying
-                          ? <Pause className="w-6 h-6 text-foreground" />
-                          : <Play className="w-6 h-6 text-foreground ml-1" />}
+                          ? <Pause className="w-4 h-4 text-white" />
+                          : <Play className="w-4 h-4 text-white ml-0.5" />}
                       </div>
                     </button>
                   )}
@@ -348,13 +358,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                             </div>
                           </div>
                         </>
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-black/60 text-white text-sm px-3 py-2 rounded-lg">
-                            Drag to select a region
-                          </div>
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -379,6 +383,11 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                         <Crop className="w-4 h-4 mr-1.5" />
                         Capture &amp; Edit
                       </Button>
+                      {!hasValidSelection && (
+                        <span className="text-xs text-muted-foreground">
+                          Drag on the frame to select a region
+                        </span>
+                      )}
                     </>
                   )}
                   {capturedFrame && !selectionMode && (
@@ -483,15 +492,22 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                 {/* Image viewer */}
                 <div className="space-y-3">
                   <div
-                    className="bg-muted/60 rounded-lg overflow-auto border border-border"
-                    style={{ height: 'calc(96vh - 260px)' }}
+                    className="bg-muted/60 rounded-lg overflow-auto border border-border mx-auto"
+                    style={{
+                      aspectRatio: capturedFrameSize
+                        ? `${capturedFrameSize.w} / ${capturedFrameSize.h}`
+                        : '16 / 9',
+                      width: capturedFrameSize
+                        ? `min(100%, calc((96vh - 200px) * ${capturedFrameSize.w} / ${capturedFrameSize.h}))`
+                        : '100%',
+                    }}
                   >
                     <img
                       src={capturedFrame}
                       alt="Captured frame region"
                       style={{
                         width: `${frameZoom}%`,
-                        minWidth: frameZoom > 100 ? `${frameZoom}%` : undefined,
+                        minWidth: frameZoom > 100 ? `${frameZoom}%` : '100%',
                         display: 'block',
                         filter: `brightness(${frameBrightness}%) contrast(${frameContrast}%) saturate(${frameSaturation}%) hue-rotate(${frameHue}deg)`,
                       }}

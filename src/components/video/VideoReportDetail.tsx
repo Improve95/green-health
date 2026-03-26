@@ -127,6 +127,10 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                 src={report.videoUrl}
                 className="w-full aspect-video object-contain"
                 onLoadedMetadata={(e) => setDuration((e.target as HTMLVideoElement).duration)}
+                onTimeUpdate={(e) => {
+                  if (!isSeekingRef.current)
+                    setCurrentTime((e.target as HTMLVideoElement).currentTime);
+                }}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
               />
@@ -134,13 +138,16 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
               {/* Play button overlay */}
               <button
                 onClick={togglePlay}
-                className="absolute inset-0 flex items-center justify-center bg-foreground/10 hover:bg-foreground/20 transition-colors"
+                className="absolute inset-0 hover:bg-black/10 transition-colors duration-200"
               >
-                <div className="w-16 h-16 rounded-full bg-card/90 flex items-center justify-center">
+                <div
+                  className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full pointer-events-none transition-opacity duration-200"
+                  style={{ opacity: isPlaying ? 0 : 0.35, background: 'rgb(0 0 0 / 0.3)' }}
+                >
                   {isPlaying ? (
-                    <Pause className="w-6 h-6 text-foreground" />
+                    <Pause className="w-4 h-4 text-white" />
                   ) : (
-                    <Play className="w-6 h-6 text-foreground ml-1" />
+                    <Play className="w-4 h-4 text-white ml-0.5" />
                   )}
                 </div>
               </button>
