@@ -59,8 +59,8 @@ export function VideoAnalysis() {
 
     try {
       const mockDiseases = ['Увядание листьев', 'Мучнистая роса', 'Гниль корней', 'Бактериальная пятнистость', 'Мозаичный вирус'];
-      const mockPlants = ['Томат', 'Кукуруза', 'Пшеница', 'Рис', 'Соя'];
-      const mockParts = ['Лист', 'Стебель', 'Корень', 'Плод', 'Цветок'];
+      const mockPlants = ['Огурец', 'Огурец', 'Огурец', 'Огурец', 'Огурец'];
+      const mockParts = ['Лист', 'Стебель', 'Плод', 'Цветок'];
 
       for (const video of uploadedVideos) {
         const analysisId = await uploadVideoForAnalysis(
