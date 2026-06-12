@@ -128,9 +128,9 @@ export async function uploadVideoForAnalysis(
         totalBytes,
         percent: Math.round((bytesSent / totalBytes) * 100),
         status: 'error',
-        error: 'WebSocket error',
+        error: 'Ошибка WebSocket',
       });
-      reject(new Error('WebSocket error'));
+      reject(new Error('Ошибка WebSocket'));
     };
   });
 }

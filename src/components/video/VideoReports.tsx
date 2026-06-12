@@ -7,6 +7,7 @@ import { VideoReportCard } from './VideoReportCard';
 import { VideoReportDetail } from './VideoReportDetail';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
+import { STATUS_LABELS } from '@/lib/utils';
 import type { VideoReport } from '@/types/app';
 import type { ReportStatus } from '@/types/api';
 
@@ -54,7 +55,7 @@ export function VideoReports() {
   return (
     <div className="animate-fade-in space-y-4">
       <h2 className="font-heading font-semibold text-lg text-foreground">
-        Video Reports
+        Отчёты по видео
       </h2>
 
       <ReportFilterPanel
@@ -66,10 +67,10 @@ export function VideoReports() {
       {filteredReports.length === 0 ? (
         <EmptyState
           icon={FileVideo}
-          title={statusFilter === 'all' ? 'No Video Reports Yet' : `No "${statusFilter}" reports`}
+          title={statusFilter === 'all' ? 'Отчётов по видео пока нет' : `Нет отчётов со статусом «${STATUS_LABELS[statusFilter]}»`}
           description={statusFilter === 'all'
-            ? 'Upload and analyze plant videos to see disease detection reports here.'
-            : 'Try changing the filter to see other reports.'}
+            ? 'Загрузите и проанализируйте видео растений, чтобы увидеть отчёты здесь.'
+            : 'Попробуйте изменить фильтр, чтобы увидеть другие отчёты.'}
         />
       ) : (
         <div className="grid gap-4">

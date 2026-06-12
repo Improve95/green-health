@@ -20,7 +20,7 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
 
   const handleAdd = async () => {
     if (!sourceName.trim()) {
-      setError('Please enter a source name');
+      setError('Введите название источника');
       return;
     }
 
@@ -49,8 +49,8 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
       console.error('Failed to get media stream:', err);
       setError(
         sourceType === 'webcam'
-          ? 'Failed to access webcam. Please ensure you have granted camera permissions.'
-          : 'Failed to start screen recording. Please try again.'
+          ? 'Не удалось получить доступ к веб-камере. Убедитесь, что разрешён доступ к камере.'
+          : 'Не удалось начать запись экрана. Попробуйте снова.'
       );
     } finally {
       setIsLoading(false);
@@ -67,13 +67,13 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Streaming Source</DialogTitle>
+          <DialogTitle>Добавить источник трансляции</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Source type selection */}
           <div className="space-y-3">
-            <Label>Source Type</Label>
+            <Label>Тип источника</Label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setSourceType('webcam')}
@@ -88,9 +88,9 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
                   'w-8 h-8 mb-2',
                   sourceType === 'webcam' ? 'text-primary' : 'text-muted-foreground'
                 )} />
-                <p className="font-medium text-foreground">Webcam</p>
+                <p className="font-medium text-foreground">Веб-камера</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Use your camera for live analysis
+                  Используйте камеру для анализа в реальном времени
                 </p>
               </button>
 
@@ -107,9 +107,9 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
                   'w-8 h-8 mb-2',
                   sourceType === 'screen' ? 'text-primary' : 'text-muted-foreground'
                 )} />
-                <p className="font-medium text-foreground">Screen</p>
+                <p className="font-medium text-foreground">Экран</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Record your screen or window
+                  Записывайте экран или окно
                 </p>
               </button>
             </div>
@@ -117,10 +117,10 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
 
           {/* Source name */}
           <div className="space-y-2">
-            <Label htmlFor="source-name">Source Name</Label>
+            <Label htmlFor="source-name">Название источника</Label>
             <Input
               id="source-name"
-              placeholder={sourceType === 'webcam' ? 'e.g., Field Camera 1' : 'e.g., Drone Feed'}
+              placeholder={sourceType === 'webcam' ? 'напр., Полевая камера 1' : 'напр., Поток с дрона'}
               value={sourceName}
               onChange={(e) => setSourceName(e.target.value)}
             />
@@ -134,10 +134,10 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={handleClose}>
-              Cancel
+              Отмена
             </Button>
             <Button onClick={handleAdd} disabled={isLoading}>
-              {isLoading ? 'Connecting...' : 'Add Source'}
+              {isLoading ? 'Подключение...' : 'Добавить источник'}
             </Button>
           </div>
         </div>

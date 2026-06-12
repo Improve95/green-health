@@ -1,5 +1,5 @@
 import { Radio, Clock, AlertTriangle, BarChart3 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, pluralize } from '@/lib/utils';
 import type { StreamingReport } from '@/types/app';
 
 interface StreamingReportCardProps {
@@ -35,7 +35,7 @@ export function StreamingReportCard({ report, onClick }: StreamingReportCardProp
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
                 <Clock className="w-3.5 h-3.5" />
                 <span>
-                  {report.startTime.toLocaleDateString()} - {report.endTime.toLocaleDateString()}
+                  {report.startTime.toLocaleDateString('ru-RU')} — {report.endTime.toLocaleDateString('ru-RU')}
                 </span>
               </div>
             </div>
@@ -48,7 +48,7 @@ export function StreamingReportCard({ report, onClick }: StreamingReportCardProp
               <span className="text-foreground font-medium">
                 {report.aggregatedStats.totalDetections}
               </span>
-              <span className="text-muted-foreground">detections</span>
+              <span className="text-muted-foreground">{pluralize(report.aggregatedStats.totalDetections, 'обнаружение', 'обнаружения', 'обнаружений')}</span>
             </div>
 
             {topDisease && (
@@ -64,7 +64,7 @@ export function StreamingReportCard({ report, onClick }: StreamingReportCardProp
             )}
 
             <span className="text-sm text-muted-foreground">
-              Avg. {report.aggregatedStats.avgConfidence}% confidence
+              Средняя уверенность {report.aggregatedStats.avgConfidence}%
             </span>
           </div>
         </div>

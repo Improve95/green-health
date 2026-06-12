@@ -1,5 +1,5 @@
 import { Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, STATUS_LABELS } from '@/lib/utils';
 import type { PhotoReport } from '@/types/app';
 import { Badge } from '@/components/ui/badge';
 
@@ -49,7 +49,7 @@ export function PhotoReportCard({ report, onClick }: PhotoReportCardProps) {
               </h3>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                 <Calendar className="w-3 h-3" />
-                {report.createdAt.toLocaleDateString()} at {report.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {report.createdAt.toLocaleDateString('ru-RU')} в {report.createdAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
             
@@ -59,7 +59,7 @@ export function PhotoReportCard({ report, onClick }: PhotoReportCardProps) {
               ) : (
                 <AlertTriangle className="w-3 h-3 mr-1" />
               )}
-              {report.status}
+              {STATUS_LABELS[report.status]}
             </Badge>
           </div>
 
@@ -88,7 +88,7 @@ export function PhotoReportCard({ report, onClick }: PhotoReportCardProps) {
           {report.detections.length === 0 && (
             <p className="text-sm text-success flex items-center gap-1">
               <CheckCircle className="w-4 h-4" />
-              No disease detected
+              Болезни не обнаружены
             </p>
           )}
         </div>

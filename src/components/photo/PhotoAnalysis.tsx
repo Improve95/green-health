@@ -32,9 +32,9 @@ export function PhotoAnalysis() {
 
   const getDefaultReportName = () => {
     if (uploadedImages.length === 1) {
-      return `${uploadedImages[0].name} - ${new Date().toLocaleString()}`;
+      return `${uploadedImages[0].name} - ${new Date().toLocaleString('ru-RU')}`;
     }
-    return `Photo Analysis - ${new Date().toLocaleString()}`;
+    return `Анализ фото — ${new Date().toLocaleString('ru-RU')}`;
   };
 
   const handleFilesSelected = useCallback((files: File[]) => {
@@ -93,9 +93,9 @@ export function PhotoAnalysis() {
               boundingBox: undefined,
               symptoms: d.symptoms,
               recommendations: [
-                'Apply appropriate treatment',
-                'Monitor plant health',
-                'Consult agronomist if symptoms persist',
+                'Примените соответствующее лечение',
+                'Следите за состоянием растения',
+                'Обратитесь к агроному, если симптомы сохраняются',
               ],
             }))
           : [];
@@ -105,8 +105,8 @@ export function PhotoAnalysis() {
           createdAt: new Date(),
           imageUrl: image.preview,
           imageName: image.name,
-          plantSpecies: imageResult?.diseases[0]?.plantPart || 'Unknown',
-          affectedPart: imageResult?.diseases[0]?.plantPart || 'Unknown',
+          plantSpecies: imageResult?.diseases[0]?.plantPart || 'Неизвестно',
+          affectedPart: imageResult?.diseases[0]?.plantPart || 'Неизвестно',
           detections,
           status: response.status,
         };
@@ -135,8 +135,8 @@ export function PhotoAnalysis() {
               accept="image/*"
               multiple
               onFilesSelected={handleFilesSelected}
-              label="Upload Images"
-              description="Drag and drop plant images here, or click to browse. Supports JPG, PNG, and WebP formats."
+              label="Загрузить изображения"
+              description="Перетащите изображения растений сюда или нажмите для выбора. Поддерживаются форматы JPG, PNG и WebP."
             />
           ) : (
             <>
@@ -161,7 +161,7 @@ export function PhotoAnalysis() {
                     className="sr-only"
                   />
                   <Plus className="w-8 h-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Add More</span>
+                  <span className="text-sm text-muted-foreground">Добавить ещё</span>
                 </label>
               </div>
             </>
@@ -174,7 +174,7 @@ export function PhotoAnalysis() {
           {hasImages && (
             <div className="bg-card rounded-xl border border-border p-4 space-y-2">
               <Label htmlFor="report-name" className="text-sm font-medium text-foreground">
-                Report Name
+                Название отчёта
               </Label>
               <Input
                 id="report-name"

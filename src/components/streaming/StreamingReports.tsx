@@ -7,6 +7,7 @@ import { StreamingReportCard } from './StreamingReportCard';
 import { StreamingReportDetail } from './StreamingReportDetail';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
+import { STATUS_LABELS } from '@/lib/utils';
 import type { StreamingReport } from '@/types/app';
 import type { ReportStatus } from '@/types/api';
 
@@ -58,7 +59,7 @@ export function StreamingReports() {
   return (
     <div className="animate-fade-in space-y-4">
       <h2 className="font-heading font-semibold text-lg text-foreground">
-        Streaming Reports
+        Отчёты трансляций
       </h2>
 
       <ReportFilterPanel
@@ -70,10 +71,10 @@ export function StreamingReports() {
       {filteredReports.length === 0 ? (
         <EmptyState
           icon={Activity}
-          title={statusFilter === 'all' ? 'No Streaming Reports Yet' : `No "${statusFilter}" reports`}
+          title={statusFilter === 'all' ? 'Отчётов трансляций пока нет' : `Нет отчётов со статусом «${STATUS_LABELS[statusFilter]}»`}
           description={statusFilter === 'all'
-            ? 'Generate reports from your streaming sessions to see aggregated disease detection data here.'
-            : 'Try changing the filter to see other reports.'}
+            ? 'Сформируйте отчёты из сессий трансляции, чтобы увидеть агрегированные данные обнаружения болезней.'
+            : 'Попробуйте изменить фильтр, чтобы увидеть другие отчёты.'}
         />
       ) : (
         <div className="grid gap-4">

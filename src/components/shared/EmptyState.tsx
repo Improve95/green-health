@@ -8,8 +8,8 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ 
-  title = 'Select a tab to begin analysis',
-  description = 'Choose a content type and mode from the navigation to get started.',
+  title = 'Выберите вкладку, чтобы начать анализ',
+  description = 'Выберите тип контента и режим в навигации, чтобы начать.',
   icon: Icon = Inbox,
   action
 }: EmptyStateProps) {

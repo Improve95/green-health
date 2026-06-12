@@ -7,6 +7,7 @@ import { PhotoReportCard } from './PhotoReportCard';
 import { PhotoReportDetail } from './PhotoReportDetail';
 import { fetchReports } from '@/services/api';
 import { REPORT_POLL_INTERVAL } from '@/config/api';
+import { STATUS_LABELS } from '@/lib/utils';
 import type { PhotoReport } from '@/types/app';
 import type { ReportStatus } from '@/types/api';
 
@@ -55,7 +56,7 @@ export function PhotoReports() {
   return (
     <div className="animate-fade-in space-y-4">
       <h2 className="font-heading font-semibold text-lg text-foreground">
-        Photo Reports
+        Отчёты по фото
       </h2>
 
       <ReportFilterPanel
@@ -67,10 +68,10 @@ export function PhotoReports() {
       {filteredReports.length === 0 ? (
         <EmptyState
           icon={FileImage}
-          title={statusFilter === 'all' ? 'No Photo Reports Yet' : `No "${statusFilter}" reports`}
+          title={statusFilter === 'all' ? 'Отчётов по фото пока нет' : `Нет отчётов со статусом «${STATUS_LABELS[statusFilter]}»`}
           description={statusFilter === 'all'
-            ? 'Upload and analyze plant images to see disease detection reports here.'
-            : 'Try changing the filter to see other reports.'}
+            ? 'Загрузите и проанализируйте изображения растений, чтобы увидеть отчёты здесь.'
+            : 'Попробуйте изменить фильтр, чтобы увидеть другие отчёты.'}
         />
       ) : (
         <div className="grid gap-4">

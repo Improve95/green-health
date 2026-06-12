@@ -4,9 +4,9 @@ import { useApp } from '@/contexts/AppContext';
 import type { ContentType } from '@/types/app';
 
 const tabs: { id: ContentType; label: string; icon: typeof Camera }[] = [
-  { id: 'photo', label: 'Photo', icon: Camera },
-  { id: 'video', label: 'Video', icon: Video },
-  { id: 'streaming', label: 'Streaming', icon: Radio },
+  { id: 'photo', label: 'Фото', icon: Camera },
+  { id: 'video', label: 'Видео', icon: Video },
+  { id: 'streaming', label: 'Трансляция', icon: Radio },
 ];
 
 export function TopTabs() {
@@ -16,7 +16,7 @@ export function TopTabs() {
     <nav 
       className="flex items-center gap-1 p-1 bg-muted/50 rounded-xl"
       role="tablist"
-      aria-label="Content type"
+      aria-label="Тип контента"
     >
       {tabs.map(({ id, label, icon: Icon }) => (
         <button

@@ -49,7 +49,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="font-heading">Edit Image</DialogTitle>
+            <DialogTitle className="font-heading">Редактировать изображение</DialogTitle>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -76,7 +76,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm">
                   <Sun className="w-4 h-4 text-muted-foreground" />
-                  Brightness
+                  Яркость
                   <span className="ml-auto text-muted-foreground">{brightness}%</span>
                 </Label>
                 <Slider
@@ -93,7 +93,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm">
                   <Contrast className="w-4 h-4 text-muted-foreground" />
-                  Contrast
+                  Контраст
                   <span className="ml-auto text-muted-foreground">{contrast}%</span>
                 </Label>
                 <Slider
@@ -110,7 +110,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm">
                   <Droplets className="w-4 h-4 text-muted-foreground" />
-                  Saturation
+                  Насыщенность
                   <span className="ml-auto text-muted-foreground">{saturation}%</span>
                 </Label>
                 <Slider
@@ -127,7 +127,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm">
                   <Focus className="w-4 h-4 text-muted-foreground" />
-                  Sharpness
+                  Резкость
                   <span className="ml-auto text-muted-foreground">{sharpness}%</span>
                 </Label>
                 <Slider
@@ -144,7 +144,7 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
             {/* Crop placeholder */}
             <div className="p-4 rounded-lg border border-dashed border-border bg-muted/30">
               <p className="text-sm text-muted-foreground text-center">
-                Crop tool coming soon
+                Инструмент обрезки скоро появится
               </p>
             </div>
           </div>
@@ -154,11 +154,11 @@ export function ImageEditModal({ image, open, onClose, onApply }: ImageEditModal
          <div className="flex-shrink-0 flex items-center justify-between gap-4 pt-4 border-t border-border">
            <Button variant="outline" onClick={handleReset}>
              <RotateCcw className="w-4 h-4 mr-2" />
-             Reset
+             Сбросить
            </Button>
            <Button onClick={handleApply}>
              <Check className="w-4 h-4 mr-2" />
-             Apply
+             Применить
            </Button>
          </div>
       </DialogContent>

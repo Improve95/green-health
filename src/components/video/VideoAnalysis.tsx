@@ -22,9 +22,9 @@ export function VideoAnalysis() {
 
   const getDefaultReportName = () => {
     if (uploadedVideos.length === 1) {
-      return `${uploadedVideos[0].name} - ${new Date().toLocaleString()}`;
+      return `${uploadedVideos[0].name} - ${new Date().toLocaleString('ru-RU')}`;
     }
-    return `Video Analysis - ${new Date().toLocaleString()}`;
+    return `Анализ видео — ${new Date().toLocaleString('ru-RU')}`;
   };
 
   const handleFilesSelected = useCallback((files: File[]) => {
@@ -58,9 +58,9 @@ export function VideoAnalysis() {
     setIsAnalyzing(true);
 
     try {
-      const mockDiseases = ['Leaf Blight', 'Powdery Mildew', 'Root Rot', 'Bacterial Spot', 'Mosaic Virus'];
-      const mockPlants = ['Tomato', 'Corn', 'Wheat', 'Rice', 'Soybean'];
-      const mockParts = ['Leaf', 'Stem', 'Root', 'Fruit', 'Flower'];
+      const mockDiseases = ['Увядание листьев', 'Мучнистая роса', 'Гниль корней', 'Бактериальная пятнистость', 'Мозаичный вирус'];
+      const mockPlants = ['Томат', 'Кукуруза', 'Пшеница', 'Рис', 'Соя'];
+      const mockParts = ['Лист', 'Стебель', 'Корень', 'Плод', 'Цветок'];
 
       for (const video of uploadedVideos) {
         const analysisId = await uploadVideoForAnalysis(
@@ -84,8 +84,8 @@ export function VideoAnalysis() {
               width: 0.3 + Math.random() * 0.3,
               height: 0.3 + Math.random() * 0.3,
             },
-            symptoms: ['Yellow spots on leaves', 'Wilting edges', 'Brown discoloration'],
-            recommendations: ['Apply fungicide treatment', 'Improve drainage', 'Remove affected leaves'],
+            symptoms: ['Жёлтые пятна на листьях', 'Увядшие края', 'Коричневое изменение цвета'],
+            recommendations: ['Примените фунгицид', 'Улучшите дренаж', 'Удалите поражённые листья'],
           };
 
           return {
@@ -135,8 +135,8 @@ export function VideoAnalysis() {
               accept="video/*"
               multiple
               onFilesSelected={handleFilesSelected}
-              label="Upload Videos"
-              description="Drag and drop plant videos here, or click to browse. Supports MP4, WebM, and MOV formats."
+              label="Загрузить видео"
+              description="Перетащите видео растений сюда или нажмите для выбора. Поддерживаются форматы MP4, WebM и MOV."
             />
           ) : (
             <>
@@ -154,7 +154,7 @@ export function VideoAnalysis() {
                       <div className="px-2">
                         <Progress value={uploadProgress[video.id].percent} className="h-1.5" />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Uploading... {uploadProgress[video.id].percent}%
+                          Загрузка... {uploadProgress[video.id].percent}%
                         </p>
                       </div>
                     )}
@@ -171,7 +171,7 @@ export function VideoAnalysis() {
                     className="sr-only"
                   />
                   <Plus className="w-8 h-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Add More</span>
+                  <span className="text-sm text-muted-foreground">Добавить ещё</span>
                 </label>
               </div>
             </>
@@ -185,7 +185,7 @@ export function VideoAnalysis() {
               {/* Report name */}
               <div className="bg-card rounded-xl border border-border p-4 space-y-2">
                 <Label htmlFor="video-report-name" className="text-sm font-medium text-foreground">
-                  Report Name
+                  Название отчёта
                 </Label>
                 <Input
                   id="video-report-name"
@@ -200,10 +200,10 @@ export function VideoAnalysis() {
               <div className="bg-card rounded-xl border border-border p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-foreground">
-                    Analysis Frame Rate
+                    Частота кадров анализа
                   </Label>
                   <span className="text-sm text-muted-foreground font-medium">
-                    {frameRate} fps
+                    {frameRate} к/с
                   </span>
                 </div>
                 <Slider
@@ -214,7 +214,7 @@ export function VideoAnalysis() {
                   step={0.5}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Higher rates capture more detail but increase processing time
+                  Более высокая частота даёт больше деталей, но увеличивает время обработки
                 </p>
               </div>
             </>

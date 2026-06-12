@@ -22,7 +22,7 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="p-6 pb-0 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="font-heading">Analysis Report</DialogTitle>
+            <DialogTitle className="font-heading">Отчёт анализа</DialogTitle>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -60,7 +60,7 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
 
               <div className="text-sm text-muted-foreground">
                 <p className="truncate">{report.imageName}</p>
-                <p>{report.createdAt.toLocaleString()}</p>
+                <p>{report.createdAt.toLocaleString('ru-RU')}</p>
               </div>
             </div>
 
@@ -72,7 +72,7 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-5 h-5 text-destructive" />
                     <h3 className="font-heading font-semibold text-foreground">
-                      Disease Detected
+                      Обнаружена болезнь
                     </h3>
                   </div>
                   <div className="flex items-center justify-between">
@@ -99,14 +99,14 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
                 <div className="p-3 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Leaf className="w-4 h-4" />
-                    <span className="text-xs">Plant Species</span>
+                    <span className="text-xs">Вид растения</span>
                   </div>
                   <p className="font-medium text-foreground">{report.plantSpecies}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Target className="w-4 h-4" />
-                    <span className="text-xs">Affected Part</span>
+                    <span className="text-xs">Поражённая часть</span>
                   </div>
                   <p className="font-medium text-foreground">{report.affectedPart}</p>
                 </div>
@@ -119,7 +119,7 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Activity className="w-4 h-4 text-muted-foreground" />
-                    <h4 className="font-medium text-foreground">Symptoms</h4>
+                    <h4 className="font-medium text-foreground">Симптомы</h4>
                   </div>
                   <ul className="space-y-2">
                     {mainDetection.symptoms.map((symptom, i) => (
@@ -137,7 +137,7 @@ export function PhotoReportDetail({ report, open, onClose }: PhotoReportDetailPr
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Lightbulb className="w-4 h-4 text-muted-foreground" />
-                    <h4 className="font-medium text-foreground">Recommendations</h4>
+                    <h4 className="font-medium text-foreground">Рекомендации</h4>
                   </div>
                   <ul className="space-y-2">
                     {mainDetection.recommendations.map((rec, i) => (

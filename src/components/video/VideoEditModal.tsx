@@ -229,17 +229,17 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
       <DialogContent className="w-[96vw] max-w-[96vw] h-[96vh] overflow-y-auto flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
-            Edit Video
+            Редактировать видео
             <span className="text-sm font-normal text-muted-foreground">{video.name}</span>
           </DialogTitle>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-4">
-            <TabsTrigger value="video" className="flex-1">Video</TabsTrigger>
+            <TabsTrigger value="video" className="flex-1">Видео</TabsTrigger>
             <TabsTrigger value="frame-editor" className="flex-1 gap-2">
               <Crop className="w-4 h-4" />
-              Frame Editor
+              Редактор кадра
               {capturedFrame && (
                 <span className="w-2 h-2 bg-primary rounded-full shrink-0" />
               )}
@@ -368,12 +368,12 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   {!selectionMode ? (
                     <Button variant="outline" size="sm" onClick={enterSelectionMode}>
                       <Crop className="w-4 h-4 mr-1.5" />
-                      Select Region
+                      Выбрать область
                     </Button>
                   ) : (
                     <>
                       <Button variant="outline" size="sm" onClick={exitSelectionMode}>
-                        Cancel
+                        Отмена
                       </Button>
                       <Button
                         size="sm"
@@ -381,18 +381,18 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                         onClick={captureFrameRegion}
                       >
                         <Crop className="w-4 h-4 mr-1.5" />
-                        Capture &amp; Edit
+                        Захватить и редактировать
                       </Button>
                       {!hasValidSelection && (
                         <span className="text-xs text-muted-foreground">
-                          Drag on the frame to select a region
+                          Перетащите на кадре, чтобы выбрать область
                         </span>
                       )}
                     </>
                   )}
                   {capturedFrame && !selectionMode && (
                     <span className="text-xs text-muted-foreground ml-1">
-                      Region captured — see Frame Editor tab
+                      Область захвачена — см. вкладку «Редактор кадра»
                     </span>
                   )}
                 </div>
@@ -419,13 +419,13 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   />
                   <div className="flex items-center justify-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => stepFrame(-1)}>
-                      <SkipBack className="w-4 h-4 mr-1" />Frame
+                      <SkipBack className="w-4 h-4 mr-1" />Кадр
                     </Button>
                     <Button variant="outline" size="sm" onClick={togglePlay}>
                       {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => stepFrame(1)}>
-                      Frame<SkipForward className="w-4 h-4 ml-1" />
+                      Кадр<SkipForward className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </div>
@@ -437,19 +437,19 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Scissors className="w-4 h-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Trim Video</Label>
+                    <Label className="text-sm font-medium">Обрезать видео</Label>
                   </div>
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Start</span>
+                        <span>Начало</span>
                         <span>{formatTime((trimStart / 100) * duration)}</span>
                       </div>
                       <Slider value={[trimStart]} onValueChange={([v]) => setTrimStart(v)} max={trimEnd - 1} step={1} />
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>End</span>
+                        <span>Конец</span>
                         <span>{formatTime((trimEnd / 100) * duration)}</span>
                       </div>
                       <Slider value={[trimEnd]} onValueChange={([v]) => setTrimEnd(v)} min={trimStart + 1} max={100} step={1} />
@@ -461,7 +461,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Sun className="w-4 h-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Brightness</Label>
+                    <Label className="text-sm font-medium">Яркость</Label>
                     <span className="ml-auto text-xs text-muted-foreground">{brightness}%</span>
                   </div>
                   <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={50} max={150} step={1} />
@@ -471,7 +471,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Contrast className="w-4 h-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Contrast</Label>
+                    <Label className="text-sm font-medium">Контраст</Label>
                     <span className="ml-auto text-xs text-muted-foreground">{contrast}%</span>
                   </div>
                   <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
@@ -479,7 +479,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
 
                 <Button variant="outline" size="sm" onClick={handleReset} className="w-full">
                   <RotateCcw className="w-4 h-4 mr-2" />
-                  Reset Adjustments
+                  Сбросить настройки
                 </Button>
               </div>
             </div>
@@ -504,7 +504,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   >
                     <img
                       src={capturedFrame}
-                      alt="Captured frame region"
+                      alt="Захваченная область кадра"
                       style={{
                         width: `${frameZoom}%`,
                         minWidth: frameZoom > 100 ? `${frameZoom}%` : '100%',
@@ -551,11 +551,11 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium flex items-center gap-2">
                       <SlidersHorizontal className="w-4 h-4" />
-                      Color Levels
+                      Уровни цвета
                     </Label>
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={resetFrameEditor}>
                       <RotateCcw className="w-3 h-3 mr-1" />
-                      Reset
+                      Сбросить
                     </Button>
                   </div>
 
@@ -563,7 +563,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Sun className="w-3 h-3" /> Brightness
+                        <Sun className="w-3 h-3" /> Яркость
                       </span>
                       <span>{frameBrightness}%</span>
                     </div>
@@ -574,7 +574,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Contrast className="w-3 h-3" /> Contrast
+                        <Contrast className="w-3 h-3" /> Контраст
                       </span>
                       <span>{frameContrast}%</span>
                     </div>
@@ -585,7 +585,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Droplets className="w-3 h-3" /> Saturation
+                        <Droplets className="w-3 h-3" /> Насыщенность
                       </span>
                       <span>{frameSaturation}%</span>
                     </div>
@@ -595,7 +595,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   {/* Hue rotation */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Hue Rotation</span>
+                      <span>Поворот оттенка</span>
                       <span>{frameHue}°</span>
                     </div>
                     <Slider value={[frameHue]} onValueChange={([v]) => setFrameHue(v)} min={-180} max={180} step={1} />
@@ -612,7 +612,7 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                       }}
                     >
                       <Crop className="w-4 h-4 mr-2" />
-                      New Selection
+                      Новая область
                     </Button>
                   </div>
                 </div>
@@ -621,15 +621,15 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
                 <Crop className="w-14 h-14 opacity-25" />
                 <div className="text-center">
-                  <p className="font-medium text-foreground mb-1">No region captured yet</p>
-                  <p className="text-sm">Select a region on a paused video frame to edit it here</p>
+                  <p className="font-medium text-foreground mb-1">Область ещё не захвачена</p>
+                  <p className="text-sm">Выберите область на остановленном кадре видео для редактирования</p>
                 </div>
                 <Button
                   variant="outline"
                   onClick={() => { setActiveTab('video'); enterSelectionMode(); }}
                 >
                   <Crop className="w-4 h-4 mr-2" />
-                  Select Region
+                  Выбрать область
                 </Button>
               </div>
             )}
@@ -638,8 +638,8 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleApply}>Apply Changes</Button>
+          <Button variant="outline" onClick={onClose}>Отмена</Button>
+          <Button onClick={handleApply}>Применить изменения</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,5 +1,5 @@
 import { FileVideo, Clock, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, pluralize, STATUS_LABELS } from '@/lib/utils';
 import type { VideoReport } from '@/types/app';
 
 interface VideoReportCardProps {
@@ -54,7 +54,7 @@ export function VideoReportCard({ report, onClick }: VideoReportCardProps) {
                 {report.videoName}
               </h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {report.createdAt.toLocaleDateString()} at {report.createdAt.toLocaleTimeString()}
+                {report.createdAt.toLocaleDateString('ru-RU')} в {report.createdAt.toLocaleTimeString('ru-RU')}
               </p>
             </div>
             
@@ -65,8 +65,8 @@ export function VideoReportCard({ report, onClick }: VideoReportCardProps) {
               report.status === 'analyzing' && 'bg-warning/10 text-warning',
               report.status === 'error' && 'bg-destructive/10 text-destructive'
             )}>
-              {report.status === 'completed' ? 'Completed' : 
-               report.status === 'analyzing' ? 'Analyzing...' : 'Error'}
+              {report.status === 'completed' ? STATUS_LABELS.completed : 
+               report.status === 'analyzing' ? `${STATUS_LABELS.analyzing}...` : STATUS_LABELS.error}
             </span>
           </div>
 
@@ -74,7 +74,7 @@ export function VideoReportCard({ report, onClick }: VideoReportCardProps) {
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <FileVideo className="w-4 h-4" />
-              <span>{report.analyzedFrames.length} frames analyzed</span>
+              <span>{report.analyzedFrames.length} {pluralize(report.analyzedFrames.length, 'кадр проанализирован', 'кадра проанализировано', 'кадров проанализировано')}</span>
             </div>
             
             {primaryDetection && (
@@ -86,7 +86,7 @@ export function VideoReportCard({ report, onClick }: VideoReportCardProps) {
                   </span>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  Avg. {avgConfidence}% confidence
+                  Средняя уверенность {avgConfidence}%
                 </span>
               </>
             )}

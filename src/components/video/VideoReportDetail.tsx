@@ -111,7 +111,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
       <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-heading flex items-center gap-2">
-            Video Analysis Report
+            Отчёт анализа видео
             <span className="text-sm font-normal text-muted-foreground">
               {report.videoName}
             </span>
@@ -190,13 +190,13 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
               <div className="flex items-center justify-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => stepFrame(-1)}>
                   <SkipBack className="w-4 h-4 mr-1" />
-                  Frame
+                  Кадр
                 </Button>
                 <Button variant="outline" size="sm" onClick={togglePlay}>
                   {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => stepFrame(1)}>
-                  Frame
+                  Кадр
                   <SkipForward className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -205,7 +205,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
             {/* Frame thumbnails */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">
-                Analyzed Frames ({report.analyzedFrames.length})
+                Проанализированные кадры ({report.analyzedFrames.length})
               </p>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {report.analyzedFrames.map((frame, index) => (
@@ -221,7 +221,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                   >
                     <div className="aspect-video bg-muted relative">
                       <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-                        Frame {frame.frameNumber ?? index + 1}
+                        Кадр {frame.frameNumber ?? index + 1}
                       </div>
                       <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-foreground/80 text-background text-[10px]">
                         {formatTime(frame.timestamp)}
@@ -247,10 +247,10 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                       disabled={currentFrameIndex <= 0}
                     >
                       <ChevronLeft className="w-4 h-4 mr-1" />
-                      Prev
+                      Назад
                     </Button>
                     <span className="text-sm text-muted-foreground">
-                      Frame {currentFrameIndex + 1} of {report.analyzedFrames.length}
+                      Кадр {currentFrameIndex + 1} из {report.analyzedFrames.length}
                     </span>
                     <Button
                       variant="outline"
@@ -258,7 +258,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                       onClick={goToNextFrame}
                       disabled={currentFrameIndex >= report.analyzedFrames.length - 1}
                     >
-                      Next
+                      Вперёд
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
@@ -267,21 +267,21 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>Timestamp: {formatTime(selectedFrame.timestamp)}</span>
+                      <span>Временная метка: {formatTime(selectedFrame.timestamp)}</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-muted/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-1">
                           <Leaf className="w-4 h-4 text-primary" />
-                          <span className="text-xs text-muted-foreground">Plant Species</span>
+                          <span className="text-xs text-muted-foreground">Вид растения</span>
                         </div>
                         <p className="font-medium text-foreground">{selectedFrame.plantSpecies}</p>
                       </div>
                       <div className="bg-muted/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-1">
                           <Target className="w-4 h-4 text-primary" />
-                          <span className="text-xs text-muted-foreground">Affected Part</span>
+                          <span className="text-xs text-muted-foreground">Поражённая часть</span>
                         </div>
                         <p className="font-medium text-foreground">{selectedFrame.affectedPart}</p>
                       </div>
@@ -308,7 +308,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-foreground mb-2">Symptoms</h4>
+                          <h4 className="text-sm font-medium text-foreground mb-2">Симптомы</h4>
                           <ul className="space-y-1">
                             {detection.symptoms.map((symptom, i) => (
                               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -320,7 +320,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-foreground mb-2">Recommendations</h4>
+                          <h4 className="text-sm font-medium text-foreground mb-2">Рекомендации</h4>
                           <ul className="space-y-1">
                             {detection.recommendations.map((rec, i) => (
                               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -337,7 +337,7 @@ export function VideoReportDetail({ report, open, onClose }: VideoReportDetailPr
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">
-                    Select a frame to view detection details
+                    Выберите кадр для просмотра деталей обнаружения
                   </p>
                 </div>
               )}

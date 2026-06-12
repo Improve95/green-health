@@ -91,7 +91,7 @@ export function FileUploadZone({
       </div>
       
       <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-        {isDragging ? 'Drop files here' : label}
+        {isDragging ? 'Отпустите файлы здесь' : label}
       </h3>
       
       <p className="text-muted-foreground text-sm max-w-xs mb-4">
@@ -99,7 +99,7 @@ export function FileUploadZone({
       </p>
       
       <Button variant="secondary" size="sm" className="pointer-events-none">
-        Choose from Device
+        Выбрать на устройстве
       </Button>
     </div>
   );

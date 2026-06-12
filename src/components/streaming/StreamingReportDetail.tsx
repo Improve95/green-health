@@ -2,7 +2,7 @@ import { X, Radio, Clock, AlertTriangle, BarChart3, TrendingUp } from 'lucide-re
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
+import { cn, pluralize } from '@/lib/utils';
 import type { StreamingReport } from '@/types/app';
 
 interface StreamingReportDetailProps {
@@ -23,7 +23,7 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-heading flex items-center gap-2">
             <Radio className="w-5 h-5" />
-            Streaming Report
+            Отчёт трансляции
             <span className="text-sm font-normal text-muted-foreground">
               {report.sourceName}
             </span>
@@ -39,21 +39,21 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
                 <p className="text-2xl font-bold text-foreground">
                   {report.aggregatedStats.totalDetections}
                 </p>
-                <p className="text-sm text-muted-foreground">Total Detections</p>
+                <p className="text-sm text-muted-foreground">Всего обнаружений</p>
               </div>
               <div className="bg-muted/50 rounded-xl p-4 text-center">
                 <TrendingUp className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-2xl font-bold text-foreground">
                   {report.aggregatedStats.avgConfidence}%
                 </p>
-                <p className="text-sm text-muted-foreground">Avg. Confidence</p>
+                <p className="text-sm text-muted-foreground">Средняя уверенность</p>
               </div>
               <div className="bg-muted/50 rounded-xl p-4 text-center">
                 <AlertTriangle className="w-6 h-6 text-warning mx-auto mb-2" />
                 <p className="text-2xl font-bold text-foreground">
                   {sortedDiseases.length}
                 </p>
-                <p className="text-sm text-muted-foreground">Disease Types</p>
+                <p className="text-sm text-muted-foreground">Типы болезней</p>
               </div>
             </div>
 
@@ -61,21 +61,21 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
               <span>
-                {report.startTime.toLocaleDateString()} {report.startTime.toLocaleTimeString()} 
+                {report.startTime.toLocaleDateString('ru-RU')} {report.startTime.toLocaleTimeString('ru-RU')} 
                 {' — '}
-                {report.endTime.toLocaleDateString()} {report.endTime.toLocaleTimeString()}
+                {report.endTime.toLocaleDateString('ru-RU')} {report.endTime.toLocaleTimeString('ru-RU')}
               </span>
             </div>
 
             {/* Disease breakdown */}
             <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Disease Breakdown</h3>
+              <h3 className="font-medium text-foreground">Распределение болезней</h3>
               <div className="space-y-3">
                 {sortedDiseases.map(({ disease, count }) => (
                   <div key={disease} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium text-foreground">{disease}</span>
-                      <span className="text-muted-foreground">{count} detection{count !== 1 ? 's' : ''}</span>
+                      <span className="text-muted-foreground">{count} {pluralize(count, 'обнаружение', 'обнаружения', 'обнаружений')}</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div 
@@ -90,7 +90,7 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
 
             {/* Detection timeline */}
             <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Detection Timeline</h3>
+              <h3 className="font-medium text-foreground">Хронология обнаружений</h3>
               <div className="space-y-2">
                 {report.detections.slice(0, 20).map((detection) => (
                   <div
@@ -109,7 +109,7 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
                         {detection.disease}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {detection.timestamp.toLocaleTimeString()}
+                        {detection.timestamp.toLocaleTimeString('ru-RU')}
                       </p>
                     </div>
                     <div className={cn(
@@ -126,7 +126,7 @@ export function StreamingReportDetail({ report, open, onClose }: StreamingReport
                 ))}
                 {report.detections.length > 20 && (
                   <p className="text-sm text-muted-foreground text-center py-2">
-                    + {report.detections.length - 20} more detections
+                    + ещё {report.detections.length - 20} {pluralize(report.detections.length - 20, 'обнаружение', 'обнаружения', 'обнаружений')}
                   </p>
                 )}
               </div>

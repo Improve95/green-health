@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import type { StreamingSource } from '@/types/app';
 
 interface GenerateReportModalProps {
@@ -30,19 +31,19 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Generate Report</DialogTitle>
+          <DialogTitle>Сформировать отчёт</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Select a date range to generate an aggregated report for{' '}
-            <span className="font-medium text-foreground">{source?.name}</span>.
+            Выберите диапазон дат для формирования агрегированного отчёта по{' '}
+            <span className="font-medium text-foreground">«{source?.name}»</span>.
           </p>
 
           {/* Date range */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>From</Label>
+              <Label>С</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -53,7 +54,7 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fromDate ? format(fromDate, 'PPP') : 'Pick a date'}
+                    {fromDate ? format(fromDate, 'PPP', { locale: ru }) : 'Выберите дату'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -61,6 +62,7 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
                     mode="single"
                     selected={fromDate}
                     onSelect={setFromDate}
+                    locale={ru}
                     initialFocus
                   />
                 </PopoverContent>
@@ -68,7 +70,7 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
             </div>
 
             <div className="space-y-2">
-              <Label>To</Label>
+              <Label>По</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -79,7 +81,7 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {toDate ? format(toDate, 'PPP') : 'Pick a date'}
+                    {toDate ? format(toDate, 'PPP', { locale: ru }) : 'Выберите дату'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -87,6 +89,7 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
                     mode="single"
                     selected={toDate}
                     onSelect={setToDate}
+                    locale={ru}
                     initialFocus
                   />
                 </PopoverContent>
@@ -97,13 +100,13 @@ export function GenerateReportModal({ open, source, onClose, onGenerate }: Gener
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              Отмена
             </Button>
             <Button 
               onClick={handleGenerate}
               disabled={!fromDate || !toDate}
             >
-              Generate Report
+              Сформировать отчёт
             </Button>
           </div>
         </div>

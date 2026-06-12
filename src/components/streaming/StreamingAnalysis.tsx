@@ -29,11 +29,11 @@ export function StreamingAnalysis() {
     if (streamingSources.length === 0) return;
 
     const mockDiseases = [
-      'Leaf Blight',
-      'Powdery Mildew',
-      'Root Rot',
-      'Bacterial Spot',
-      'Mosaic Virus'
+      'Увядание листьев',
+      'Мучнистая роса',
+      'Гниль корней',
+      'Бактериальная пятнистость',
+      'Мозаичный вирус'
     ];
 
     const interval = setInterval(() => {
@@ -126,12 +126,12 @@ export function StreamingAnalysis() {
           {!hasSources ? (
             <EmptyState
               icon={Radio}
-              title="Streaming Analysis"
-              description="Add a streaming source (Screen Recording or Webcam) to start real-time plant disease detection."
+              title="Анализ трансляции"
+              description="Добавьте источник трансляции (запись экрана или веб-камера) для обнаружения болезней растений в реальном времени."
               action={
                 <Button onClick={() => setShowAddModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Streaming Source
+                  Добавить источник трансляции
                 </Button>
               }
             />
@@ -141,7 +141,7 @@ export function StreamingAnalysis() {
               <div className="flex justify-end">
                 <Button onClick={() => setShowAddModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Source
+                  Добавить источник
                 </Button>
               </div>
 

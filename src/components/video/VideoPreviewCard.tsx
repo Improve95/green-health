@@ -10,9 +10,9 @@ interface VideoPreviewCardProps {
 
 export function VideoPreviewCard({ video, onRemove, onEdit }: VideoPreviewCardProps) {
   const formatSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024) return `${bytes} Б`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
   };
 
   const formatDuration = (seconds?: number) => {
@@ -86,7 +86,7 @@ export function VideoPreviewCard({ video, onRemove, onEdit }: VideoPreviewCardPr
           'opacity-0 group-hover:opacity-100 transition-opacity',
           'hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-ring'
         )}
-        aria-label={`Remove ${video.name}`}
+        aria-label={`Удалить ${video.name}`}
       >
         <X className="w-4 h-4" />
       </button>

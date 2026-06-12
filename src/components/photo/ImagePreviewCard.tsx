@@ -10,9 +10,9 @@ interface ImagePreviewCardProps {
 
 export function ImagePreviewCard({ image, onRemove, onEdit }: ImagePreviewCardProps) {
   const formatSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024) return `${bytes} Б`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
   };
 
   return (
@@ -68,7 +68,7 @@ export function ImagePreviewCard({ image, onRemove, onEdit }: ImagePreviewCardPr
           'opacity-0 group-hover:opacity-100 transition-opacity',
           'hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-ring'
         )}
-        aria-label={`Remove ${image.name}`}
+        aria-label={`Удалить ${image.name}`}
       >
         <X className="w-4 h-4" />
       </button>

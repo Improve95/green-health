@@ -25,10 +25,10 @@ export function Header() {
           </div>
           <div>
             <h1 className="font-heading font-bold text-lg text-foreground leading-tight">
-              Plant Disease Analyzer
+              Анализатор болезней растений
             </h1>
             <p className="text-xs text-muted-foreground hidden sm:block">
-              AI-Powered Crop Health Detection
+              ИИ-диагностика здоровья посевов
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            aria-label="Toggle theme"
+            aria-label="Переключить тему"
             className="rounded-lg"
           >
             {isDark ? (

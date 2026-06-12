@@ -31,14 +31,14 @@ async function get<T>(path: string): Promise<T> {
 // ── Stubs ──
 
 function stubPhotoAnalysis(req: PhotoAnalysisRequest): PhotoAnalysisResponse {
-  const diseases = ['Leaf Blight', 'Powdery Mildew', 'Root Rot', 'Bacterial Spot', 'Mosaic Virus'];
-  const parts = ['Leaf', 'Stem', 'Root', 'Fruit', 'Flower'];
+  const diseases = ['Увядание листьев', 'Мучнистая роса', 'Гниль корней', 'Бактериальная пятнистость', 'Мозаичный вирус'];
+  const parts = ['Лист', 'Стебель', 'Корень', 'Плод', 'Цветок'];
   const symptoms = [
-    ['Yellow spots on leaves', 'Wilting edges', 'Brown discoloration'],
-    ['White powdery coating', 'Curled leaves', 'Stunted growth'],
-    ['Soft brown roots', 'Yellowing foliage', 'Wilting'],
-    ['Dark spots with halos', 'Leaf drop', 'Fruit lesions'],
-    ['Mosaic pattern on leaves', 'Leaf distortion', 'Reduced yield'],
+    ['Жёлтые пятна на листьях', 'Увядшие края', 'Коричневое изменение цвета'],
+    ['Белый мучнистый налёт', 'Скрученные листья', 'Задержка роста'],
+    ['Мягкие коричневые корни', 'Пожелтение листвы', 'Увядание'],
+    ['Тёмные пятна с ореолами', 'Опадание листьев', 'Поражения плодов'],
+    ['Мозаичный рисунок на листьях', 'Деформация листьев', 'Снижение урожая'],
   ];
 
   return {
@@ -75,7 +75,7 @@ function stubReportList(type?: ReportType, status?: ReportStatus): ReportListRes
 function stubReportDetail(reportId: string): ReportDetailResponse {
   return {
     reportId,
-    reportName: 'Stub Report',
+    reportName: 'Тестовый отчёт',
     type: 'photo',
     status: 'completed',
     createdAt: new Date().toISOString(),

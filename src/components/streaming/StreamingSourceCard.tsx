@@ -93,7 +93,7 @@ export function StreamingSourceCard({
           {source.isActive && (
             <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-              LIVE
+              В ЭФИРЕ
             </div>
           )}
 
@@ -118,13 +118,13 @@ export function StreamingSourceCard({
                 <h3 className="font-medium text-foreground">{source.name}</h3>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                Started {source.createdAt.toLocaleTimeString()}
+                Запущено в {source.createdAt.toLocaleTimeString('ru-RU')}
               </p>
             </div>
             <button
               onClick={onRemove}
               className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-              aria-label="Remove source"
+              aria-label="Удалить источник"
             >
               <X className="w-4 h-4" />
             </button>
@@ -139,7 +139,7 @@ export function StreamingSourceCard({
               onClick={onResetReport}
             >
               <RotateCcw className="w-4 h-4 mr-1.5" />
-              Reset
+              Сбросить
             </Button>
             <Button
               size="sm"
@@ -147,7 +147,7 @@ export function StreamingSourceCard({
               onClick={onGenerateReport}
             >
               <FileText className="w-4 h-4 mr-1.5" />
-              Report
+              Отчёт
             </Button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export function StreamingSourceCard({
               {source.isActive && (
                 <span className="ml-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  LIVE
+                  В ЭФИРЕ
                 </span>
               )}
             </DialogTitle>
@@ -190,7 +190,7 @@ export function StreamingSourceCard({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-muted-foreground">Stream not available</p>
+                  <p className="text-muted-foreground">Трансляция недоступна</p>
                 </div>
               )}
             </div>
@@ -202,7 +202,7 @@ export function StreamingSourceCard({
               variant="outline"
             >
               <CameraIcon className="w-4 h-4 mr-2" />
-              Take Screenshot
+              Сделать снимок экрана
             </Button>
           </div>
         </DialogContent>
