@@ -613,28 +613,16 @@ export function VideoEditModal({
           <TabsContent value="frame-editor" className="h-full mt-0 min-h-0 overflow-hidden">
             {capturedFrame ? (
               <div className="space-y-4 h-full min-h-0 overflow-hidden flex flex-col">
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={handleScreenshot}>
-                    <Crop className="w-4 h-4 mr-2" />
-                    Скриншот кадра
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setActiveTab('video');
-                      enterSelectionMode();
-                    }}
-                  >
-                    <Crop className="w-4 h-4 mr-2" />
-                    Выбрать область
-                  </Button>
-                </div>
                 <div className="flex-1 min-h-0 overflow-hidden">
                   <FrameEditorModal
                     title="Редактор кадра"
                     imageSrc={capturedFrame}
                     imageSize={capturedFrameSize}
+                    onScreenshot={handleScreenshot}
+                    onSelectArea={() => {
+                      setActiveTab('video');
+                      enterSelectionMode();
+                    }}
                     onClose={() => {
                       setActiveTab('video');
                     }}

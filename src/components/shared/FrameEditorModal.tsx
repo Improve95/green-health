@@ -10,6 +10,8 @@ interface FrameEditorModalProps {
   imageSize?: { w: number; h: number } | null;
   onClose?: () => void;
   onSendToAnalysis?: () => void;
+  onSelectArea?: () => void;
+  onScreenshot?: () => void;
   isAnalyzing?: boolean;
 }
 
@@ -19,6 +21,8 @@ export function FrameEditorModal({
   imageSize,
   onClose,
   onSendToAnalysis,
+  onSelectArea,
+  onScreenshot,
   isAnalyzing = false,
 }: FrameEditorModalProps) {
   const [frameZoom, setFrameZoom] = useState(100);
@@ -143,6 +147,28 @@ export function FrameEditorModal({
         </div>
 
         <div className="pt-4 border-t border-border space-y-2">
+          {onScreenshot && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={onScreenshot}
+            >
+              <Crop className="w-4 h-4 mr-2" />
+              Скриншот кадра
+            </Button>
+          )}
+          {onSelectArea && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={onSelectArea}
+            >
+              <Crop className="w-4 h-4 mr-2" />
+              Выбрать область
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
