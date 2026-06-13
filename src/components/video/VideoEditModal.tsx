@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Play, Pause, RotateCcw, Scissors, Sun, Contrast,
   SkipBack, SkipForward, Crop, ZoomIn, ZoomOut, SlidersHorizontal, Droplets,
+  Activity,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,13 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { VideoFile } from '@/types/app';
+import { PhotoAnalysis } from '../photo/PhotoAnalysis';
 
 interface VideoEditModalProps {
   video: VideoFile | null;
   open: boolean;
   onClose: () => void;
+  onSubmit: () => void;
   onApply: (updates: Partial<VideoFile>) => void;
 }
 
@@ -21,7 +24,7 @@ interface SelectionRect {
   x: number; y: number; w: number; h: number;
 }
 
-export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModalProps) {
+export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: VideoEditModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -602,6 +605,14 @@ export function VideoEditModal({ video, open, onClose, onApply }: VideoEditModal
                   </div>
 
                   <div className="pt-2 border-t border-border">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mb-2"
+                    >
+                      <Activity className="w-4 h-4 mr-2" />
+                      Отправить на анализ
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
