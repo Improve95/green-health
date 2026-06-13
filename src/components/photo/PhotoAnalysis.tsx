@@ -136,7 +136,7 @@ export function PhotoAnalysis() {
               multiple
               onFilesSelected={handleFilesSelected}
               label="Загрузить изображения"
-              description="Перетащите изображения растений сюда или нажмите для выбора. Поддерживаются форматы JPG, PNG и WebP."
+              description="Перетащите изображения растений сюда или нажмите для выбора."
             />
           ) : (
             <>

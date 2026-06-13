@@ -136,7 +136,7 @@ export function VideoAnalysis() {
               multiple
               onFilesSelected={handleFilesSelected}
               label="Загрузить видео"
-              description="Перетащите видео растений сюда или нажмите для выбора. Поддерживаются форматы MP4, WebM и MOV."
+              description="Перетащите видео растений сюда или нажмите для выбора."
             />
           ) : (
             <>
