@@ -16,6 +16,8 @@ import { FrameEditorModal } from '@/components/shared/FrameEditorModal';
 
 interface VideoEditModalProps {
   video: VideoFile | null;
+  stream?: MediaStream | null;
+  titleOverride?: string;
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -26,7 +28,7 @@ interface SelectionRect {
   x: number; y: number; w: number; h: number;
 }
 
-export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: VideoEditModalProps) {
+export function VideoEditModal({ video, stream = null, titleOverride, open, onClose, onApply, onSubmit }: VideoEditModalProps) {
   const { addPhotoReport, setViewMode } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -52,6 +54,7 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
   const [capturedFrameSize, setCapturedFrameSize] = useState<{ w: number; h: number } | null>(null);
   const [isSendingFrame, setIsSendingFrame] = useState(false);
+  const videoLabel = titleOverride || video?.name || 'Видео';
 
   useEffect(() => {
     if (video) {
@@ -211,12 +214,12 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
   const stripDataUrl = (dataUrl: string) => dataUrl.split(',')[1] || dataUrl;
 
   const handleSendFrameToAnalysis = async () => {
-    if (!capturedFrame || !video) return;
+    if (!capturedFrame) return;
     setIsSendingFrame(true);
     try {
       const image: PhotoAnalysisRequestImage = {
         data: stripDataUrl(capturedFrame),
-        fileName: `${video.name}-frame.png`,
+        fileName: `${videoLabel}-frame.png`,
         mimeType: 'image/png',
         settings: {
           brightness,
@@ -226,7 +229,7 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
       };
 
       const response = await submitPhotoAnalysis({
-        reportName: `Кадр из видео — ${video.name}`,
+        reportName: `Кадр из видео — ${videoLabel}`,
         images: [image],
       });
 
@@ -250,7 +253,7 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
         id: response.reportId,
         createdAt: new Date(),
         imageUrl: capturedFrame,
-        imageName: video.name,
+        imageName: videoLabel,
         plantSpecies: result?.diseases[0]?.plantPart || 'Неизвестно',
         affectedPart: result?.diseases[0]?.plantPart || 'Неизвестно',
         detections,
@@ -268,7 +271,7 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
 
   const hasValidSelection = selection && selection.w > 0.02 && selection.h > 0.02;
 
-  if (!video) return null;
+  if (!video && !stream) return null;
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
@@ -276,7 +279,7 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
             Редактировать видео
-            <span className="text-sm font-normal text-muted-foreground">{video.name}</span>
+            <span className="text-sm font-normal text-muted-foreground">{videoLabel}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -310,13 +313,18 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
                   }}
                 >
                   <video
-                    ref={videoRef}
-                    src={video.preview}
+                    ref={(el) => {
+                      videoRef.current = el;
+                      if (el && stream) {
+                        el.srcObject = stream;
+                      }
+                    }}
+                    src={!stream ? video?.preview : undefined}
                     className="w-full h-full object-contain"
                     style={{ filter: `brightness(${brightness}%) contrast(${contrast}%)` }}
                     onLoadedMetadata={(e) => {
                       const vid = e.target as HTMLVideoElement;
-                      setDuration(vid.duration);
+                      setDuration(Number.isFinite(vid.duration) ? vid.duration : 0);
                       setVideoNaturalSize({ w: vid.videoWidth, h: vid.videoHeight });
                     }}
                     onTimeUpdate={(e) => {

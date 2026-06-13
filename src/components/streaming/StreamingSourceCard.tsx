@@ -3,11 +3,8 @@ import { Monitor, Camera, RotateCcw, FileText, X, Play, Camera as CameraIcon, Pa
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { useApp } from '@/contexts/AppContext';
-import { submitPhotoAnalysis } from '@/services/api';
 import type { StreamingSource } from '@/types/app';
-import type { PhotoAnalysisRequestImage } from '@/types/api';
-import { FrameEditorModal } from '@/components/shared/FrameEditorModal';
+import { VideoEditModal } from '@/components/video/VideoEditModal';
 
 interface StreamingSourceCardProps {
   source: StreamingSource;
@@ -22,15 +19,10 @@ export function StreamingSourceCard({
   onResetReport, 
   onGenerateReport 
 }: StreamingSourceCardProps) {
-  const { addPhotoReport, setViewMode } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullVideoRef = useRef<HTMLVideoElement>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [showFrameEditor, setShowFrameEditor] = useState(false);
-  const [pausedFrame, setPausedFrame] = useState<string | null>(null);
-  const [pausedFrameSize, setPausedFrameSize] = useState<{ w: number; h: number } | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isSendingFrame, setIsSendingFrame] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   const takeScreenshot = () => {
     const video = fullVideoRef.current;
@@ -60,114 +52,6 @@ export function StreamingSourceCard({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
-  };
-
-  const captureCurrentFrame = () => {
-    const video = fullVideoRef.current;
-    if (!video) return null;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-
-    ctx.drawImage(video, 0, 0);
-    return {
-      src: canvas.toDataURL('image/png'),
-      size: { w: canvas.width, h: canvas.height },
-    };
-  };
-
-  const togglePausePreview = () => {
-    const video = fullVideoRef.current;
-    if (!video) return;
-
-    if (isPaused) {
-      video.play();
-      setIsPaused(false);
-      return;
-    }
-
-    video.pause();
-    setIsPaused(true);
-    const frame = captureCurrentFrame();
-    if (frame) {
-      setPausedFrame(frame.src);
-      setPausedFrameSize(frame.size);
-    }
-  };
-
-  const openFrameEditor = () => {
-    const video = fullVideoRef.current;
-    if (!video) return;
-    video.pause();
-    setIsPaused(true);
-    const frame = captureCurrentFrame();
-    if (frame) {
-      setPausedFrame(frame.src);
-      setPausedFrameSize(frame.size);
-    }
-    setShowFrameEditor(true);
-  };
-
-  const stripDataUrl = (dataUrl: string) => dataUrl.split(',')[1] || dataUrl;
-
-  const handleSendFrameToAnalysis = async () => {
-    if (!pausedFrame) return;
-
-    setIsSendingFrame(true);
-    try {
-      const image: PhotoAnalysisRequestImage = {
-        data: stripDataUrl(pausedFrame),
-        fileName: `${source.name}-frame.png`,
-        mimeType: 'image/png',
-        settings: {
-          brightness: 100,
-          contrast: 100,
-          saturation: 100,
-        },
-      };
-
-      const response = await submitPhotoAnalysis({
-        reportName: `Кадр трансляции — ${source.name}`,
-        images: [image],
-      });
-
-      const result = response.results[0];
-      const detections = result
-        ? result.diseases.map(d => ({
-            id: crypto.randomUUID(),
-            disease: d.disease,
-            confidence: d.probability,
-            boundingBox: undefined,
-            symptoms: d.symptoms,
-            recommendations: [
-              'Примените соответствующее лечение',
-              'Следите за состоянием растения',
-              'Обратитесь к агроному, если симптомы сохраняются',
-            ],
-          }))
-        : [];
-
-      addPhotoReport({
-        id: response.reportId,
-        createdAt: new Date(),
-        imageUrl: pausedFrame,
-        imageName: source.name,
-        plantSpecies: result?.diseases[0]?.plantPart || 'Неизвестно',
-        affectedPart: result?.diseases[0]?.plantPart || 'Неизвестно',
-        detections,
-        status: response.status,
-      });
-
-      setViewMode('report');
-      setShowFrameEditor(false);
-    } catch (err) {
-      console.error('Frame analysis failed:', err);
-    } finally {
-      setIsSendingFrame(false);
-    }
   };
 
   useEffect(() => {
@@ -314,61 +198,27 @@ export function StreamingSourceCard({
             </div>
             
             {/* Screenshot button */}
-            <Button 
-              onClick={takeScreenshot}
-              className="w-full"
-              variant="outline"
-            >
+            <Button onClick={takeScreenshot} className="w-full" variant="outline">
               <CameraIcon className="w-4 h-4 mr-2" />
               Сделать снимок экрана
             </Button>
-            <Button
-              onClick={togglePausePreview}
-              className="w-full"
-              variant="outline"
-            >
-              {isPaused ? (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  Продолжить поток
-                </>
-              ) : (
-                <>
-                  <Pause className="w-4 h-4 mr-2" />
-                  Пауза потока
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={openFrameEditor}
-              className="w-full"
-            >
+            <Button onClick={() => setShowEditor(true)} className="w-full">
               <Crop className="w-4 h-4 mr-2" />
-              Открыть кадр в редакторе
+              Открыть в редакторе
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showFrameEditor} onOpenChange={setShowFrameEditor}>
-        <DialogContent className="w-[96vw] max-w-[96vw] h-[96vh] overflow-y-auto flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Crop className="w-5 h-5" />
-              Редактор кадра потока
-            </DialogTitle>
-          </DialogHeader>
-
-          <FrameEditorModal
-            title={source.name}
-            imageSrc={pausedFrame}
-            imageSize={pausedFrameSize}
-            onClose={() => setShowFrameEditor(false)}
-            onSendToAnalysis={handleSendFrameToAnalysis}
-            isAnalyzing={isSendingFrame}
-          />
-        </DialogContent>
-      </Dialog>
+      <VideoEditModal
+        video={null}
+        stream={source.stream ?? null}
+        titleOverride={source.name}
+        open={showEditor}
+        onClose={() => setShowEditor(false)}
+        onSubmit={() => setShowEditor(false)}
+        onApply={() => setShowEditor(false)}
+      />
     </>
   );
 }
