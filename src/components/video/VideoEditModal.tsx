@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Play, Pause, RotateCcw, Scissors, Sun, Contrast,
-  SkipBack, SkipForward, Crop, ZoomIn, ZoomOut, SlidersHorizontal, Droplets,
-  Activity,
+  SkipBack, SkipForward, Crop,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useApp } from '@/contexts/AppContext';
+import { submitPhotoAnalysis } from '@/services/api';
 import type { VideoFile } from '@/types/app';
-import { PhotoAnalysis } from '../photo/PhotoAnalysis';
+import type { PhotoAnalysisRequestImage } from '@/types/api';
+import { FrameEditorModal } from '@/components/shared/FrameEditorModal';
 
 interface VideoEditModalProps {
   video: VideoFile | null;
@@ -25,6 +27,7 @@ interface SelectionRect {
 }
 
 export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: VideoEditModalProps) {
+  const { addPhotoReport, setViewMode } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -45,15 +48,10 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
   // Natural video dimensions (set after metadata loads)
   const [videoNaturalSize, setVideoNaturalSize] = useState<{ w: number; h: number } | null>(null);
 
-  // Frame editor
   const [activeTab, setActiveTab] = useState('video');
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
   const [capturedFrameSize, setCapturedFrameSize] = useState<{ w: number; h: number } | null>(null);
-  const [frameZoom, setFrameZoom] = useState(100);
-  const [frameBrightness, setFrameBrightness] = useState(100);
-  const [frameContrast, setFrameContrast] = useState(100);
-  const [frameSaturation, setFrameSaturation] = useState(100);
-  const [frameHue, setFrameHue] = useState(0);
+  const [isSendingFrame, setIsSendingFrame] = useState(false);
 
   useEffect(() => {
     if (video) {
@@ -192,11 +190,6 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
 
     setCapturedFrame(canvas.toDataURL('image/png'));
     setCapturedFrameSize({ w: canvas.width, h: canvas.height });
-    setFrameZoom(100);
-    setFrameBrightness(100);
-    setFrameContrast(100);
-    setFrameSaturation(100);
-    setFrameHue(0);
     exitSelectionMode();
     setActiveTab('frame-editor');
   };
@@ -210,17 +203,67 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
     setTrimEnd(100);
   };
 
-  const resetFrameEditor = () => {
-    setFrameZoom(100);
-    setFrameBrightness(100);
-    setFrameContrast(100);
-    setFrameSaturation(100);
-    setFrameHue(0);
-  };
-
   const handleApply = () => {
     onApply({});
     onClose();
+  };
+
+  const stripDataUrl = (dataUrl: string) => dataUrl.split(',')[1] || dataUrl;
+
+  const handleSendFrameToAnalysis = async () => {
+    if (!capturedFrame || !video) return;
+    setIsSendingFrame(true);
+    try {
+      const image: PhotoAnalysisRequestImage = {
+        data: stripDataUrl(capturedFrame),
+        fileName: `${video.name}-frame.png`,
+        mimeType: 'image/png',
+        settings: {
+          brightness,
+          contrast,
+          saturation: 100,
+        },
+      };
+
+      const response = await submitPhotoAnalysis({
+        reportName: `Кадр из видео — ${video.name}`,
+        images: [image],
+      });
+
+      const result = response.results[0];
+      const detections = result
+        ? result.diseases.map(d => ({
+            id: crypto.randomUUID(),
+            disease: d.disease,
+            confidence: d.probability,
+            boundingBox: undefined,
+            symptoms: d.symptoms,
+            recommendations: [
+              'Примените соответствующее лечение',
+              'Следите за состоянием растения',
+              'Обратитесь к агроному, если симптомы сохраняются',
+            ],
+          }))
+        : [];
+
+      addPhotoReport({
+        id: response.reportId,
+        createdAt: new Date(),
+        imageUrl: capturedFrame,
+        imageName: video.name,
+        plantSpecies: result?.diseases[0]?.plantPart || 'Неизвестно',
+        affectedPart: result?.diseases[0]?.plantPart || 'Неизвестно',
+        detections,
+        status: response.status,
+      });
+
+      setViewMode('report');
+      onClose();
+    } catch (err) {
+      console.error('Frame analysis failed:', err);
+    } finally {
+      setIsSendingFrame(false);
+    }
   };
 
   const hasValidSelection = selection && selection.w > 0.02 && selection.h > 0.02;
@@ -491,143 +534,16 @@ export function VideoEditModal({ video, open, onClose, onApply, onSubmit }: Vide
           {/* ── FRAME EDITOR TAB ───────────────────────────────────────────── */}
           <TabsContent value="frame-editor">
             {capturedFrame ? (
-              <div className="grid lg:grid-cols-[1fr,260px] gap-6">
-                {/* Image viewer */}
-                <div className="space-y-3">
-                  <div
-                    className="bg-muted/60 rounded-lg overflow-auto border border-border mx-auto"
-                    style={{
-                      aspectRatio: capturedFrameSize
-                        ? `${capturedFrameSize.w} / ${capturedFrameSize.h}`
-                        : '16 / 9',
-                      width: capturedFrameSize
-                        ? `min(100%, calc((96vh - 200px) * ${capturedFrameSize.w} / ${capturedFrameSize.h}))`
-                        : '100%',
-                    }}
-                  >
-                    <img
-                      src={capturedFrame}
-                      alt="Захваченная область кадра"
-                      style={{
-                        width: `${frameZoom}%`,
-                        minWidth: frameZoom > 100 ? `${frameZoom}%` : '100%',
-                        display: 'block',
-                        filter: `brightness(${frameBrightness}%) contrast(${frameContrast}%) saturate(${frameSaturation}%) hue-rotate(${frameHue}deg)`,
-                      }}
-                    />
-                  </div>
-
-                  {/* Zoom bar */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      onClick={() => setFrameZoom(v => Math.max(25, v - 25))}
-                    >
-                      <ZoomOut className="w-4 h-4" />
-                    </Button>
-                    <Slider
-                      value={[frameZoom]}
-                      onValueChange={([v]) => setFrameZoom(v)}
-                      min={25}
-                      max={400}
-                      step={5}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      onClick={() => setFrameZoom(v => Math.min(400, v + 25))}
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </Button>
-                    <span className="text-xs text-muted-foreground w-10 text-right shrink-0">
-                      {frameZoom}%
-                    </span>
-                  </div>
-                </div>
-
-                {/* Color controls */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <SlidersHorizontal className="w-4 h-4" />
-                      Уровни цвета
-                    </Label>
-                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={resetFrameEditor}>
-                      <RotateCcw className="w-3 h-3 mr-1" />
-                      Сбросить
-                    </Button>
-                  </div>
-
-                  {/* Brightness */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Sun className="w-3 h-3" /> Яркость
-                      </span>
-                      <span>{frameBrightness}%</span>
-                    </div>
-                    <Slider value={[frameBrightness]} onValueChange={([v]) => setFrameBrightness(v)} min={0} max={200} step={1} />
-                  </div>
-
-                  {/* Contrast */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Contrast className="w-3 h-3" /> Контраст
-                      </span>
-                      <span>{frameContrast}%</span>
-                    </div>
-                    <Slider value={[frameContrast]} onValueChange={([v]) => setFrameContrast(v)} min={0} max={200} step={1} />
-                  </div>
-
-                  {/* Saturation */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Droplets className="w-3 h-3" /> Насыщенность
-                      </span>
-                      <span>{frameSaturation}%</span>
-                    </div>
-                    <Slider value={[frameSaturation]} onValueChange={([v]) => setFrameSaturation(v)} min={0} max={200} step={1} />
-                  </div>
-
-                  {/* Hue rotation */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Поворот оттенка</span>
-                      <span>{frameHue}°</span>
-                    </div>
-                    <Slider value={[frameHue]} onValueChange={([v]) => setFrameHue(v)} min={-180} max={180} step={1} />
-                  </div>
-
-                  <div className="pt-2 border-t border-border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full mb-2"
-                    >
-                      <Activity className="w-4 h-4 mr-2" />
-                      Отправить на анализ
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => {
-                        setActiveTab('video');
-                        enterSelectionMode();
-                      }}
-                    >
-                      <Crop className="w-4 h-4 mr-2" />
-                      Новая область
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <FrameEditorModal
+                title="Редактор кадра"
+                imageSrc={capturedFrame}
+                imageSize={capturedFrameSize}
+                onClose={() => {
+                  setActiveTab('video');
+                }}
+                onSendToAnalysis={handleSendFrameToAnalysis}
+                isAnalyzing={isSendingFrame}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
                 <Crop className="w-14 h-14 opacity-25" />
