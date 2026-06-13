@@ -18,6 +18,8 @@ interface VideoEditModalProps {
   video: VideoFile | null;
   stream?: MediaStream | null;
   titleOverride?: string;
+  initialCapturedFrame?: string | null;
+  initialCapturedFrameSize?: { w: number; h: number } | null;
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -28,7 +30,17 @@ interface SelectionRect {
   x: number; y: number; w: number; h: number;
 }
 
-export function VideoEditModal({ video, stream = null, titleOverride, open, onClose, onApply, onSubmit }: VideoEditModalProps) {
+export function VideoEditModal({
+  video,
+  stream = null,
+  titleOverride,
+  initialCapturedFrame = null,
+  initialCapturedFrameSize = null,
+  open,
+  onClose,
+  onApply,
+  onSubmit,
+}: VideoEditModalProps) {
   const { addPhotoReport, setViewMode } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -70,6 +82,14 @@ export function VideoEditModal({ video, stream = null, titleOverride, open, onCl
       setVideoNaturalSize(null);
     }
   }, [video]);
+
+  useEffect(() => {
+    if (initialCapturedFrame) {
+      setCapturedFrame(initialCapturedFrame);
+      setCapturedFrameSize(initialCapturedFrameSize);
+      setActiveTab('frame-editor');
+    }
+  }, [initialCapturedFrame, initialCapturedFrameSize]);
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -197,6 +217,23 @@ export function VideoEditModal({ video, stream = null, titleOverride, open, onCl
     setActiveTab('frame-editor');
   };
 
+  const captureCurrentFrame = () => {
+    const vid = videoRef.current;
+    if (!vid) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = vid.videoWidth || 640;
+    canvas.height = vid.videoHeight || 360;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.drawImage(vid, 0, 0);
+    return {
+      src: canvas.toDataURL('image/png'),
+      size: { w: canvas.width, h: canvas.height },
+    };
+  };
+
   // ── Video controls ──────────────────────────────────────────────────────────
 
   const handleReset = () => {
@@ -271,7 +308,27 @@ export function VideoEditModal({ video, stream = null, titleOverride, open, onCl
 
   const hasValidSelection = selection && selection.w > 0.02 && selection.h > 0.02;
 
-  if (!video && !stream) return null;
+  const handleStopFrame = () => {
+    const frame = captureCurrentFrame();
+    if (!frame) return;
+    setCapturedFrame(frame.src);
+    setCapturedFrameSize(frame.size);
+    setHasFixedFrame(true);
+    setActiveTab('frame-editor');
+  };
+
+  const handleScreenshot = () => {
+    const frame = captureCurrentFrame();
+    if (!frame) return;
+    const a = document.createElement('a');
+    a.href = frame.src;
+    a.download = `${videoLabel}-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  if (!video && !stream && !capturedFrame) return null;
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
@@ -420,10 +477,18 @@ export function VideoEditModal({ video, stream = null, titleOverride, open, onCl
                 {/* Region selection toolbar */}
                 <div className="flex items-center gap-2">
                   {!selectionMode ? (
-                    <Button variant="outline" size="sm" onClick={enterSelectionMode}>
-                      <Crop className="w-4 h-4 mr-1.5" />
-                      Выбрать область
-                    </Button>
+                    <>
+                      <Button variant="outline" size="sm" onClick={enterSelectionMode}>
+                        <Crop className="w-4 h-4 mr-1.5" />
+                        Выбрать область
+                      </Button>
+                      {stream && (
+                        <Button variant="outline" size="sm" onClick={handleStopFrame}>
+                          <Pause className="w-4 h-4 mr-1.5" />
+                          Остановить кадр
+                        </Button>
+                      )}
+                    </>
                   ) : (
                     <>
                       <Button variant="outline" size="sm" onClick={exitSelectionMode}>
@@ -542,30 +607,44 @@ export function VideoEditModal({ video, stream = null, titleOverride, open, onCl
           {/* ── FRAME EDITOR TAB ───────────────────────────────────────────── */}
           <TabsContent value="frame-editor">
             {capturedFrame ? (
-              <FrameEditorModal
-                title="Редактор кадра"
-                imageSrc={capturedFrame}
-                imageSize={capturedFrameSize}
-                onClose={() => {
-                  setActiveTab('video');
-                }}
-                onSendToAnalysis={handleSendFrameToAnalysis}
-                isAnalyzing={isSendingFrame}
-              />
+              <div className="space-y-4">
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={handleScreenshot}>
+                    <Crop className="w-4 h-4 mr-2" />
+                    Скриншот кадра
+                  </Button>
+                </div>
+                <FrameEditorModal
+                  title="Редактор кадра"
+                  imageSrc={capturedFrame}
+                  imageSize={capturedFrameSize}
+                  onClose={() => {
+                    setActiveTab('video');
+                  }}
+                  onSendToAnalysis={handleSendFrameToAnalysis}
+                  isAnalyzing={isSendingFrame}
+                />
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
                 <Crop className="w-14 h-14 opacity-25" />
                 <div className="text-center">
                   <p className="font-medium text-foreground mb-1">Область ещё не захвачена</p>
-                  <p className="text-sm">Выберите область на остановленном кадре видео для редактирования</p>
+                  <p className="text-sm">
+                    {video || stream
+                      ? 'Выберите область на остановленном кадре видео для редактирования'
+                      : 'Сначала остановите кадр, чтобы перейти к редактированию'}
+                  </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => { setActiveTab('video'); enterSelectionMode(); }}
-                >
-                  <Crop className="w-4 h-4 mr-2" />
-                  Выбрать область
-                </Button>
+                {(video || stream) && (
+                  <Button
+                    variant="outline"
+                    onClick={() => { setActiveTab('video'); enterSelectionMode(); }}
+                  >
+                    <Crop className="w-4 h-4 mr-2" />
+                    Выбрать область
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>

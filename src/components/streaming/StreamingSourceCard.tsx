@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Monitor, Camera, RotateCcw, FileText, X, Play, Camera as CameraIcon, Pause, Crop } from 'lucide-react';
+import { Monitor, Camera, RotateCcw, FileText, X, Play, Crop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -20,38 +20,28 @@ export function StreamingSourceCard({
   onGenerateReport 
 }: StreamingSourceCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const fullVideoRef = useRef<HTMLVideoElement>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [editorFrame, setEditorFrame] = useState<string | null>(null);
+  const [editorFrameSize, setEditorFrameSize] = useState<{ w: number; h: number } | null>(null);
 
-  const takeScreenshot = () => {
-    const video = fullVideoRef.current;
-    if (!video) return;
-
-    // Create a canvas to draw the video frame
+  const captureFrame = (video: HTMLVideoElement | null) => {
+    if (!video) return null;
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
-    
-    if (!ctx) return;
-
-    // Draw the current video frame
+    if (!ctx) return null;
     ctx.drawImage(video, 0, 0);
+    return { src: canvas.toDataURL('image/png'), size: { w: canvas.width, h: canvas.height } };
+  };
 
-    // Convert canvas to blob and download
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `screenshot-${source.name}-${new Date().getTime()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
+  const openStoppedFrameEditor = () => {
+    const frame = captureFrame(videoRef.current);
+    if (!frame) return;
+    setEditorFrame(frame.src);
+    setEditorFrameSize(frame.size);
+    setShowEditor(true);
   };
 
   useEffect(() => {
@@ -185,7 +175,6 @@ export function StreamingSourceCard({
                   ref={(el) => {
                     if (el && source.stream) {
                       el.srcObject = source.stream;
-                      fullVideoRef.current = el;
                     }
                   }}
                   className="w-full h-full object-contain"
@@ -198,13 +187,9 @@ export function StreamingSourceCard({
             </div>
             
             {/* Screenshot button */}
-            <Button onClick={takeScreenshot} className="w-full" variant="outline">
-              <CameraIcon className="w-4 h-4 mr-2" />
-              Сделать снимок экрана
-            </Button>
-            <Button onClick={() => setShowEditor(true)} className="w-full">
+            <Button onClick={openStoppedFrameEditor} className="w-full">
               <Crop className="w-4 h-4 mr-2" />
-              Открыть в редакторе
+              Остановить кадр и открыть
             </Button>
           </div>
         </DialogContent>
@@ -212,12 +197,14 @@ export function StreamingSourceCard({
 
       <VideoEditModal
         video={null}
-        stream={source.stream ?? null}
+        stream={null}
         titleOverride={source.name}
         open={showEditor}
         onClose={() => setShowEditor(false)}
         onSubmit={() => setShowEditor(false)}
         onApply={() => setShowEditor(false)}
+        initialCapturedFrame={editorFrame}
+        initialCapturedFrameSize={editorFrameSize}
       />
     </>
   );
