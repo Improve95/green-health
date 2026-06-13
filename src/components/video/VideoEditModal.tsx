@@ -250,6 +250,15 @@ export function VideoEditModal({
 
   const stripDataUrl = (dataUrl: string) => dataUrl.split(',')[1] || dataUrl;
 
+  const downloadFrame = (src: string) => {
+    const a = document.createElement('a');
+    a.href = src;
+    a.download = `${videoLabel}-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const handleSendFrameToAnalysis = async () => {
     if (!capturedFrame) return;
     setIsSendingFrame(true);
@@ -318,14 +327,14 @@ export function VideoEditModal({
   };
 
   const handleScreenshot = () => {
+    if (capturedFrame) {
+      downloadFrame(capturedFrame);
+      return;
+    }
+
     const frame = captureCurrentFrame();
     if (!frame) return;
-    const a = document.createElement('a');
-    a.href = frame.src;
-    a.download = `${videoLabel}-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    downloadFrame(frame.src);
   };
 
   if (!video && !stream && !capturedFrame) return null;
