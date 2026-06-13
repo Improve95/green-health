@@ -332,7 +332,7 @@ export function VideoEditModal({
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
-      <DialogContent className="w-[100vw] max-w-none h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-none h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col p-0 rounded-xl">
         <div className="flex flex-col h-full p-6 overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">

@@ -38,14 +38,14 @@ export function FrameEditorModal({
   if (!imageSrc) return null;
 
   return (
-    <div className="grid lg:grid-cols-[1fr,260px] gap-6">
-      <div className="space-y-3">
+    <div className="grid lg:grid-cols-[1fr,280px] gap-6 h-full min-h-0">
+      <div className="space-y-4 min-h-0">
         <div
           className="bg-muted/60 rounded-lg overflow-auto border border-border mx-auto"
           style={{
             aspectRatio: imageSize ? `${imageSize.w} / ${imageSize.h}` : '16 / 9',
             width: imageSize
-              ? `min(100%, calc((96vh - 200px) * ${imageSize.w} / ${imageSize.h}))`
+              ? `min(100%, calc((100dvh - 320px) * ${imageSize.w} / ${imageSize.h}))`
               : '100%',
           }}
         >
@@ -92,7 +92,7 @@ export function FrameEditorModal({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6 min-h-0">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4" />
@@ -104,7 +104,7 @@ export function FrameEditorModal({
           </Button>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Sun className="w-3 h-3" /> Яркость
@@ -114,7 +114,7 @@ export function FrameEditorModal({
           <Slider value={[frameBrightness]} onValueChange={([v]) => setFrameBrightness(v)} min={0} max={200} step={1} />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Contrast className="w-3 h-3" /> Контраст
@@ -124,7 +124,7 @@ export function FrameEditorModal({
           <Slider value={[frameContrast]} onValueChange={([v]) => setFrameContrast(v)} min={0} max={200} step={1} />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Droplets className="w-3 h-3" /> Насыщенность
@@ -134,7 +134,7 @@ export function FrameEditorModal({
           <Slider value={[frameSaturation]} onValueChange={([v]) => setFrameSaturation(v)} min={0} max={200} step={1} />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Поворот оттенка</span>
             <span>{frameHue}°</span>
@@ -142,7 +142,7 @@ export function FrameEditorModal({
           <Slider value={[frameHue]} onValueChange={([v]) => setFrameHue(v)} min={-180} max={180} step={1} />
         </div>
 
-        <div className="pt-2 border-t border-border">
+        <div className="pt-4 border-t border-border space-y-2">
           <Button
             variant="outline"
             size="sm"
