@@ -332,7 +332,8 @@ export function VideoEditModal({
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[96vh] overflow-y-auto flex flex-col">
+      <DialogContent className="w-[100vw] max-w-none h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col p-0">
+        <div className="flex flex-col h-full p-6 overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
             Редактировать видео
@@ -340,7 +341,7 @@ export function VideoEditModal({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 min-h-0">
           <TabsList className="w-full mb-4">
             <TabsTrigger value="video" className="flex-1">Видео</TabsTrigger>
             <TabsTrigger value="frame-editor" className="flex-1 gap-2">
@@ -353,8 +354,8 @@ export function VideoEditModal({
           </TabsList>
 
           {/* ── VIDEO TAB ──────────────────────────────────────────────────── */}
-          <TabsContent value="video">
-            <div className="grid lg:grid-cols-[1fr,280px] gap-6">
+          <TabsContent value="video" className="h-full mt-0">
+            <div className="grid lg:grid-cols-[1fr,280px] gap-6 h-full min-h-0">
               {/* Left: video + controls */}
               <div className="space-y-4">
                 {/* Video container */}
@@ -596,34 +597,40 @@ export function VideoEditModal({
                   <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
                 </div>
 
-                <Button variant="outline" size="sm" onClick={handleReset} className="w-full">
+                  <Button variant="outline" size="sm" onClick={handleReset} className="w-full">
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Сбросить настройки
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleScreenshot} className="w-full">
+                  <Crop className="w-4 h-4 mr-2" />
+                  Сделать скриншот
                 </Button>
               </div>
             </div>
           </TabsContent>
 
           {/* ── FRAME EDITOR TAB ───────────────────────────────────────────── */}
-          <TabsContent value="frame-editor">
+          <TabsContent value="frame-editor" className="h-full mt-0 min-h-0 overflow-hidden">
             {capturedFrame ? (
-              <div className="space-y-4">
+              <div className="space-y-4 h-full min-h-0 overflow-hidden flex flex-col">
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" size="sm" onClick={handleScreenshot}>
                     <Crop className="w-4 h-4 mr-2" />
                     Скриншот кадра
                   </Button>
                 </div>
-                <FrameEditorModal
-                  title="Редактор кадра"
-                  imageSrc={capturedFrame}
-                  imageSize={capturedFrameSize}
-                  onClose={() => {
-                    setActiveTab('video');
-                  }}
-                  onSendToAnalysis={handleSendFrameToAnalysis}
-                  isAnalyzing={isSendingFrame}
-                />
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <FrameEditorModal
+                    title="Редактор кадра"
+                    imageSrc={capturedFrame}
+                    imageSize={capturedFrameSize}
+                    onClose={() => {
+                      setActiveTab('video');
+                    }}
+                    onSendToAnalysis={handleSendFrameToAnalysis}
+                    isAnalyzing={isSendingFrame}
+                  />
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
@@ -654,6 +661,7 @@ export function VideoEditModal({
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button variant="outline" onClick={onClose}>Отмена</Button>
           <Button onClick={handleApply}>Применить изменения</Button>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
