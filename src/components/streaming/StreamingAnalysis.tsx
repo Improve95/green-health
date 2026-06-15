@@ -29,9 +29,9 @@ export function StreamingAnalysis() {
     if (streamingSources.length === 0) return;
 
     const mockDiseases = [
-      'Увядание листьев',
+      'Фитофтороз',
       'Мучнистая роса',
-      'Гниль корней',
+      'Корневая гниль',
       'Бактериальная пятнистость',
       'Мозаичный вирус'
     ];

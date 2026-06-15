@@ -31,7 +31,7 @@ async function get<T>(path: string): Promise<T> {
 // ── Stubs ──
 
 function stubPhotoAnalysis(req: PhotoAnalysisRequest): PhotoAnalysisResponse {
-  const diseases = ['Увядание листьев', 'Мучнистая роса', 'Гниль корней', 'Бактериальная пятнистость', 'Мозаичный вирус'];
+  const diseases = ['Фитофтороз', 'Мучнистая роса', 'Корневая гниль', 'Бактериальная пятнистость', 'Мозаичный вирус'];
   const parts = ['Лист', 'Стебель', 'Корень', 'Плод', 'Цветок'];
   const symptoms = [
     ['Жёлтые пятна на листьях', 'Увядшие края', 'Коричневое изменение цвета'],

@@ -67,6 +67,7 @@ export function VideoEditModal({
   const [capturedFrameSize, setCapturedFrameSize] = useState<{ w: number; h: number } | null>(null);
   const [isSendingFrame, setIsSendingFrame] = useState(false);
   const videoLabel = titleOverride || video?.name || 'Видео';
+  const isStreamOnly = !!stream && !video;
 
   useEffect(() => {
     if (video) {
@@ -90,6 +91,12 @@ export function VideoEditModal({
       setActiveTab('frame-editor');
     }
   }, [initialCapturedFrame, initialCapturedFrameSize]);
+
+  useEffect(() => {
+    if (isStreamOnly) {
+      setActiveTab('frame-editor');
+    }
+  }, [isStreamOnly]);
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -322,7 +329,6 @@ export function VideoEditModal({
     if (!frame) return;
     setCapturedFrame(frame.src);
     setCapturedFrameSize(frame.size);
-    setHasFixedFrame(true);
     setActiveTab('frame-editor');
   };
 
@@ -350,6 +356,42 @@ export function VideoEditModal({
           </DialogTitle>
         </DialogHeader>
 
+        {isStreamOnly ? (
+          <div className="w-full flex-1 min-h-0">
+            <div className="flex items-center gap-2 mb-4">
+              <Crop className="w-4 h-4" />
+              <span className="font-medium">Редактор кадра</span>
+              {capturedFrame && <span className="w-2 h-2 bg-primary rounded-full shrink-0" />}
+            </div>
+            <div className="h-[calc(100%-2rem)] min-h-0 overflow-hidden">
+              <div className="h-full min-h-0 overflow-hidden">
+                {capturedFrame ? (
+                  <div className="space-y-4 h-full min-h-0 overflow-hidden flex flex-col">
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                      <FrameEditorModal
+                        title="Редактор кадра"
+                        imageSrc={capturedFrame}
+                        imageSize={capturedFrameSize}
+                        onScreenshot={handleScreenshot}
+                        onClose={onClose}
+                        onSendToAnalysis={handleSendFrameToAnalysis}
+                        isAnalyzing={isSendingFrame}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
+                    <Crop className="w-14 h-14 opacity-25" />
+                    <div className="text-center">
+                      <p className="font-medium text-foreground mb-1">Кадр ещё не остановлен</p>
+                      <p className="text-sm">Нажмите «Остановить кадр» в левом окне, чтобы открыть редактор</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 min-h-0">
           <TabsList className="w-full mb-4">
             <TabsTrigger value="video" className="flex-1">Видео</TabsTrigger>
@@ -363,6 +405,7 @@ export function VideoEditModal({
           </TabsList>
 
           {/* ── VIDEO TAB ──────────────────────────────────────────────────── */}
+          {!isStreamOnly && (
           <TabsContent value="video" className="h-full mt-0">
             <div className="grid lg:grid-cols-[1fr,280px] gap-6 h-full min-h-0">
               {/* Left: video + controls */}
@@ -617,6 +660,7 @@ export function VideoEditModal({
               </div>
             </div>
           </TabsContent>
+          )}
 
           {/* ── FRAME EDITOR TAB ───────────────────────────────────────────── */}
           <TabsContent value="frame-editor" className="h-full mt-0 min-h-0 overflow-hidden">
@@ -628,12 +672,12 @@ export function VideoEditModal({
                     imageSrc={capturedFrame}
                     imageSize={capturedFrameSize}
                     onScreenshot={handleScreenshot}
-                    onSelectArea={() => {
-                      setActiveTab('video');
-                      enterSelectionMode();
-                    }}
                     onClose={() => {
-                      setActiveTab('video');
+                      if (isStreamOnly) {
+                        onClose();
+                      } else {
+                        setActiveTab('video');
+                      }
                     }}
                     onSendToAnalysis={handleSendFrameToAnalysis}
                     isAnalyzing={isSendingFrame}
@@ -651,7 +695,7 @@ export function VideoEditModal({
                       : 'Сначала остановите кадр, чтобы перейти к редактированию'}
                   </p>
                 </div>
-                {(video || stream) && (
+                {video && (
                   <Button
                     variant="outline"
                     onClick={() => { setActiveTab('video'); enterSelectionMode(); }}
@@ -664,6 +708,7 @@ export function VideoEditModal({
             )}
           </TabsContent>
         </Tabs>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
